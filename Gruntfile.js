@@ -34,7 +34,7 @@ module.exports = function(grunt) {
         timeout: 3000,
         ignoreLeaks: false,
         ui: 'bdd',
-        reporter: 'tap'
+        reporter: 'spec'
       },
       all: {
         src: 'test/**/*.js'
@@ -50,8 +50,31 @@ module.exports = function(grunt) {
         'index.js',
         'lib/**/*.js',
         'routes/**/*.js',
-        'test/**/*.js'
+        'test/**/*.js',
+        'client/**/*.js',
       ]
+    },
+    browserify: {
+      dist: {
+        files: {
+          'example/build/main.js': ['client/scripts/**/*.js'],
+          // 'build/main.js': ['client/scripts/**/*.js', 'client/scripts/**/*.coffee'],
+        },
+        options: {
+          // transform: ['coffeeify']
+        }
+      }
+    },
+    less: {
+      development: {
+        options: {
+          paths: ["client/stylesheets"],
+          yuicompress: true
+        },
+        files: {
+          "example/build/linotype.css": ['client/stylesheets/**/*.less']
+        }
+      }
     },
     copy: {
       main: {
@@ -60,7 +83,7 @@ module.exports = function(grunt) {
           // {expand: true, src: ['path/*'], dest: 'dest/', filter: 'isFile'},
 
           // includes files within path and its sub-directories
-          {expand: true, src: ['assets/**'], dest: '../module/assets/'},
+          // {expand: true, src: ['assets/**'], dest: '../module/assets/'},
 
           // makes all src relative to cwd
           // {expand: true, cwd: 'path/', src: ['**'], dest: 'dest/'},
@@ -76,15 +99,13 @@ module.exports = function(grunt) {
         files: [
           'Gruntfile.js',
           'config/**/*.js',
-          'app.js',
+          'index.js',
           'lib/**/*.js',
-          'routes/**/*.js',
+          'client/**/*.js',
+          'client/**/*.less',
           'test/**/*.js',
-          // 'public/assets/js/build/**/*.js',
-          // 'public/assets/js/build/*.js',
-          // 'public/assets/css/*.less'
         ],
-        tasks: ['lint', 'test','less'],
+        tasks: ['lint','browserify', 'test','less'],
         options: {
           interrupt: true
         }
@@ -99,6 +120,8 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-browserify');
+  grunt.loadNpmTasks('grunt-contrib-less');
 
 
   grunt.registerTask('default', ['jshint', 'simplemocha']);
