@@ -6,6 +6,10 @@
   "engines": {
     "node": ">=0.10.x"
   },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/typesettin/linotype.git"
+  },
   "scripts": {
     "test": "mocha -R spec --recursive"
   },
