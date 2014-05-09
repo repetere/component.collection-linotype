@@ -8,13 +8,36 @@
 'use strict';
 
 var should = require('chai').should();
-var linotype = require('../lib/linotype');
+var Linotype = require('../lib/linotype');
 
-describe('linotype', function () {
-  describe('#indexOf()', function () {
-    it('should return -1 when the value is not present', function () {
-      should.equal(-1, [1,2,3].indexOf(5));
-      should.equal(-1, [1,2,3].indexOf(0));
-    });
-  });
+var linotypeFactory = {
+	create: function(overwrites){
+		return Object.create(new Linotype(overwrites));
+	}
+};
+
+describe('Linotype - paige compositor', function () {
+
+	describe('Customization and overwriteable options', function () {
+		var linotype;
+
+		it('should return configuration object', function () {
+			linotype = linotypeFactory.create();
+			linotype.config().should.be.a("object");
+		});
+
+		it('should allow you to overwrite default options',function(){
+			linotype = linotypeFactory.create({resize:false});
+			should.equal(linotype.config().resize,false);
+		});
+
+		it('should throw configurationError for incompatible scrolling configuration', function(){
+			try{
+				linotype = linotypeFactory.create({continuousVertical:true,loopBottom:true});
+			}
+			catch(e){
+				e.name.should.equal("ConfigurationError");
+			}
+		});
+	});
 });

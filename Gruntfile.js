@@ -1,8 +1,8 @@
 /*
  * linotype
- * http://github.amexpub.com/modules/linotype
+ * http://github.com/typesettin/linotype
  *
- * Copyright (c) 2013 Amex Pub. All rights reserved.
+ * Copyright (c) 2014 typesettin. All rights reserved.
  */
 
 'use strict';
@@ -53,6 +53,14 @@ module.exports = function(grunt) {
         'test/**/*.js',
         'client/**/*.js',
       ]
+    },
+    jsdoc : {
+        dist : {
+            src: ['lib/*.js', 'test/*.js'],
+            options: {
+                destination: 'doc'
+            }
+        }
     },
     browserify: {
       dist: {
@@ -105,7 +113,7 @@ module.exports = function(grunt) {
           'client/**/*.less',
           'test/**/*.js',
         ],
-        tasks: ['lint','browserify', 'test','less'],
+        tasks: ['lint','browserify','doc', 'test','less'],
         options: {
           interrupt: true
         }
@@ -122,9 +130,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-less');
-
+  grunt.loadNpmTasks('grunt-jsdoc');
 
   grunt.registerTask('default', ['jshint', 'simplemocha']);
   grunt.registerTask('lint', 'jshint');
+  grunt.registerTask('doc','jsdoc');
   grunt.registerTask('test', 'simplemocha');
 };

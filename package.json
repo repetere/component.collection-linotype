@@ -28,7 +28,9 @@
     "grunt-jsbeautifier": "0.1.7",
     "mocha": "1.9.0",
     "grunt-browserify": "^2.0.8",
-    "grunt-contrib-less": "^0.11.0"
+    "grunt-contrib-less": "^0.11.0",
+    "jsdoc": "^3.3.0-alpha5",
+    "grunt-jsdoc": "^0.5.4"
   },
   "keywords": [
     "content presentation framework",
