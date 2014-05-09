@@ -32,6 +32,7 @@ var classie = require('classie'),
 /**
  * Represents a linotype.
  * @constructor
+ * @package {object} options - configuration options for the page composition
  */
 var linotype = function(options){
 	var defaults = {

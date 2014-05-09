@@ -113,7 +113,7 @@ module.exports = function(grunt) {
           'client/**/*.less',
           'test/**/*.js',
         ],
-        tasks: ['lint','browserify','doc', 'test','less'],
+        tasks: ['lint','browserify', 'test','less'],
         options: {
           interrupt: true
         }

@@ -31,8 +31,11 @@ describe('Linotype - paige compositor', function () {
 			should.equal(linotype.config().resize,false);
 		});
 
-		it('should throw configurationError for incompatible scrolling configuration', function(){
+		it('should throw ConfigurationError for incompatible scrolling options',function(){
 			try{
+			// 	(function(){
+			// 	linotypeFactory.create({continuousVertical:true,loopBottom:true});
+			// })().should.not.throw(Error);
 				linotype = linotypeFactory.create({continuousVertical:true,loopBottom:true});
 			}
 			catch(e){
