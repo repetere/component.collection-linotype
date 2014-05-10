@@ -28,7 +28,7 @@
             <pre class="prettyprint source"><code>/*
  * linotype
  * https://github.com/typesettin/linotype
- *
+ * @author yaw joseph etse
  * Copyright (c) 2014 Typesettin. All rights reserved.
  */
 
@@ -40,12 +40,21 @@ var classie = require('classie'),
 	util = require('util');
 
 /**
- * Represents a linotype.
- * @constructor
- * @package {object} options - configuration options for the page composition
+ * A module that represents a linotype object, a linotyper is a page composition tool.
+ * @author yaw joseph etse
+ * @module linotype
+ * @requires module:classie
+ * @requires module:util-extent
+ * @requires module:util
+ * @requires module:events
+ * @property {object} defaults - the default module configuration
  */
-var linotype = function(options){
-	var defaults = {
+
+var linotype = function(config_options){
+	/** module default configuration */
+	var options,
+		linotypeElement,
+		defaults = {
 			'verticalCentered' : true,
 			'resize' : true,
 			'slidesColor' : [],
@@ -74,6 +83,7 @@ var linotype = function(options){
 			'touchSensitivity': 5,
 			'continuousVertical': false,
 			'animateAnchor': true,
+			'idSelector' : 'fullpage',
 			'normalScrollElementTouchThreshold': 5,
 
 			//events
@@ -87,17 +97,21 @@ var linotype = function(options){
 		ConfigurationError = function(message){
 			this.name = "ConfigurationError";
 			this.message = message || "Linotype Configuration Error";
-		};
+		},
+		scrollDelay = (typeof config_options === "object" && typeof config_options.scrollDelay === "number") ? config_options.scrollDelay : 600,
+		container;
 
 	//extend default options
-	options = extend( defaults,options );
+	options = extend( defaults,config_options );
 
+	linotypeElement = document.getElementById(options.idSelector);
+	container = linotypeElement;
 
+	/**
+	 * @exception {ConfigurationError} If conflicting scrolling options are set
+	 */
 	ConfigurationError.prototype = new Error();
 	ConfigurationError.prototype.constructor = ConfigurationError;
-
-
-	// Disable mutually exclusive settings
 	if (options.continuousVertical &&
 		(options.loopTop || options.loopBottom)) {
 	    options.continuousVertical = false;
@@ -105,9 +119,106 @@ var linotype = function(options){
 		throw new ConfigurationError("Option loopTop/loopBottom is mutually exclusive with continuousVertical; continuousVertical disabled");
 	}
 
+	/** @throws Disable mutually exclusive settings */
+	if (scrollDelay &lt; 400) {
+	    options.continuousVertical = false;
+
+		throw new RangeError("BE CAREFUL! Not recommened to change it under 400 for a good behavior in laptops and Apple devices (laptops, mouses...)");
+	}
+
+	/** The current module configuration */
 	this.config = function(){
 		return options;
 	};
+
+	/** The current scroll delay setting */
+	this.scrollDelay = function(){
+		return scrollDelay;
+	};
+
+	/**
+	 * set the scrolling behaviour
+	 * @param {number} value
+	 */
+	this.setAutoScrolling = function(value){
+		options.autoScrolling = value; //el = document.getElementById( options.idSelector ), //sections = el.getElementsByClassName( options.sectionClass );
+		var element = document.getElementsByClassName('section active')[0],
+			docElemHTML = document.getElementsByTagName("html")[0],
+			docElemBody = document.getElementsByTagName("body")[0],
+			elementPosition = element.getBoundingClientRect();
+
+		if(options.autoScrolling){
+			docElemHTML.style.overflow = 'hidden';
+			docElemHTML.style.height = '100%';
+			docElemBody.style.overflow = 'hidden';
+			docElemBody.style.height = '100%';
+
+			if(element.length){
+				//moving the container up
+				silentScroll(elementPosition.top);
+			}
+		}
+		else{
+			docElemHTML.style.overflow = 'auto';
+			docElemHTML.style.height = 'auto';
+			docElemBody.style.overflow = 'auto';
+			docElemBody.style.height = 'auto';
+
+			silentScroll(0);
+
+			//scrolling the page to the section with no animation
+			docElemHTML.scrollTop = elementPosition.top;
+			docElemBody.scrollTop = elementPosition.top;
+		}
+	};
+
+	/**
+	 * return browser preview for transforms.
+	 * @private
+	 * @param { string } translate3d - css transform propert
+	 */
+	function getTransforms(translate3d){
+		return {
+			'-webkit-transform': translate3d,
+			'-moz-transform': translate3d,
+			'-ms-transform':translate3d,
+			'transform': translate3d
+		};
+	}
+
+	/**
+	 * Adds a css3 transform property to the container class with or without animation depending on the animated param.
+	 * @private
+	 */
+	function transformContainer(translate3d, animated){
+		// container.toggleClass('easing', animated);
+		var transformsObject = getTransforms(translate3d);
+		classie.toggle( container, 'easing' );
+
+		// container.css(getTransforms(translate3d));
+		for(var x in transformsObject){
+			container.style[x] = transformsObject[x];
+		}
+	}
+
+	/**
+	 * set the remove scrolling effect
+	 * @private
+	 * @param {number} top
+	 */
+	function silentScroll(top){
+		if (options.css3) {
+			var translate3d = 'translate3d(0px, -' + top + 'px, 0px)';
+			transformContainer(translate3d, false);
+		}
+		else {
+			// container.css("top", -top);
+			container.style.top = -top;
+		}
+	}
+
+
+
 };
 
 module.exports = linotype;</code></pre>
@@ -120,13 +231,13 @@ module.exports = linotype;</code></pre>
 </div>
 
 <nav>
-    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="linotype.html">linotype</a></li></ul>
+    <h2><a href="index.html">Index</a></h2><h3>Modules</h3><ul><li><a href="module-linotype.html">linotype</a></li></ul>
 </nav>
 
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Fri May 09 2014 17:26:37 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Sat May 10 2014 14:40:35 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -30,7 +30,8 @@
     "grunt-browserify": "^2.0.8",
     "grunt-contrib-less": "^0.11.0",
     "jsdoc": "^3.3.0-alpha5",
-    "grunt-jsdoc": "^0.5.4"
+    "grunt-jsdoc": "^0.5.4",
+    "zombie": "~2.0.0-alpha31"
   },
   "keywords": [
     "content presentation framework",
