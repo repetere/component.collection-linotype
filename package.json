@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "browserify": "^3.46.0",
-    "classie": "0.0.1",
+    "classie": ">=0.0.1",
     "util-extend": "^1.0.1"
   },
   "devDependencies": {
