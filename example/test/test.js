@@ -1,12 +1,169 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/*
+ * detect-dom-ready
+ * http://github.amexpub.com/modules/detect-dom-ready
+ *
+ * Copyright (c) 2013 Amex Pub. All rights reserved.
+ */
+
+'use strict';
+
+module.exports = function(grunt) {
+  grunt.initConfig({
+    jsbeautifier: {
+      files: ["<%= jshint.all %>"],
+      options: {
+        "indent_size": 2,
+        "indent_char": " ",
+        "indent_level": 0,
+        "indent_with_tabs": false,
+        "preserve_newlines": true,
+        "max_preserve_newlines": 10,
+        "brace_style": "collapse",
+        "keep_array_indentation": false,
+        "keep_function_indentation": false,
+        "space_before_conditional": true,
+        "eval_code": false,
+        "indent_case": false,
+        "unescape_strings": false,
+        "space_after_anon_function": true
+      }
+    },
+    simplemocha: {
+      options: {
+        globals: ['should'],
+        timeout: 3000,
+        ignoreLeaks: false,
+        ui: 'bdd',
+        reporter: 'tap'
+      },
+      all: {
+        src: 'test/**/*.js'
+      }
+    },
+    jshint: {
+      options: {
+        jshintrc: '.jshintrc'
+      },
+      all: [
+        'Gruntfile.js',
+        'index.js',
+        'lib/**/*.js',
+        'test/**/*.js'
+      ]
+    },
+    watch: {
+      scripts: {
+        // files: '**/*.js',
+        files: [
+          'Gruntfile.js',
+          'index.js',
+          'lib/**/*.js',
+          'test/**/*.js'
+        ],
+        tasks: ['lint', 'test'],
+        options: {
+          interrupt: true
+        }
+      }
+    }
+  });
+
+  grunt.loadNpmTasks('grunt-simple-mocha');
+  grunt.loadNpmTasks('grunt-jsbeautifier');
+  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-watch');
+
+
+  grunt.registerTask('default', ['jshint', 'simplemocha']);
+  grunt.registerTask('lint', 'jshint');
+  grunt.registerTask('test', 'simplemocha');
+};
+
+},{}],2:[function(require,module,exports){
+/*
+ * detect-dom-ready
+ * http://github.amexpub.com/modules/detect-dom-ready
+ *
+ * Copyright (c) 2013 AmexPub. All rights reserved.
+ */
+
+module.exports = require('./lib/detect-dom-ready');
+
+},{"./lib/detect-dom-ready":3}],3:[function(require,module,exports){
+/*
+ * detect-dom-ready
+ * http://github.amexpub.com/modules
+ *
+ * Copyright (c) 2013 Amex Pub. All rights reserved.
+ */
+
+'use strict';
+
+module.exports = function(callback){
+    // if ( this.readyBound ) {return;}
+    // this.readyBound = true;
+
+    if(document.addEventListener){
+        document.addEventListener( "DOMContentLoaded", function(){
+            //remove listener
+            callback();
+            return;
+        }, false );
+    }
+    else if(document.attachEvent){
+        document.attachEvent("onreadystatechange", function(){
+            if ( document.readyState === "complete" ) {
+                //remove listener
+                callback();
+                return;
+            }
+        });
+
+        if ( document.documentElement.doScroll && window === window.top ){
+            try{
+                // If IE is used, use the trick by Diego Perini
+                // http://javascript.nwbox.com/IEContentLoaded/
+                document.documentElement.doScroll("left");
+
+            }
+            catch( error ) {
+                callback();
+                return;
+            }
+            // and execute any waiting functions
+            callback();
+            return;
+        }
+    }
+};
+},{}],4:[function(require,module,exports){
 'use strict';
 
 // console.log("example test wepps!!s");
 
-var linotype = require('../../../index');
+var linotype = require('../../../index'),
+	domReady = require('detect-dom-ready');
 
-window.pagegen = new linotype();
-},{"../../../index":2}],2:[function(require,module,exports){
+
+domReady(function(){
+}); //executes after dom has loaded
+
+window.onload =function(){
+	window.Linotype = new linotype({
+		slidesColor: ['#1bbc9b', '#4BBFC3', '#7BAABE', 'whitesmoke', '#ccddff'],
+		anchors: ['firstPage', 'secondPage', '3rdPage', '4thpage', 'lastPage'],
+		menu: 'menu',
+		slidesNavigation: true,
+		idSelector: 'fullpage',
+		navigation: true,
+		navigationPosition: 'right',
+		navigationTooltips: ['First', 'Second', 'Third']
+	});
+
+	window.Linotype.init();
+};
+},{"../../../index":5,"detect-dom-ready":2}],5:[function(require,module,exports){
 /*
  * linotype
  * http://github.amexpub.com/modules/linotype
@@ -16,7 +173,7 @@ window.pagegen = new linotype();
 
 module.exports = require('./lib/linotype');
 
-},{"./lib/linotype":3}],3:[function(require,module,exports){
+},{"./lib/linotype":6}],6:[function(require,module,exports){
 /*
  * linotype
  * https://github.com/typesettin/linotype
@@ -91,13 +248,17 @@ var linotype = function(config_options){
 			this.message = message || "Linotype Configuration Error";
 		},
 		scrollDelay = (typeof config_options === "object" && typeof config_options.scrollDelay === "number") ? config_options.scrollDelay : 600,
-		container;
+		container,
+		slideMoving = false,
+		isTablet = navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry|Windows Phone)/),
+		windowsHeight,
+		isMoving = false,
+		isResizing = false,
+		lastScrolledDestiny,
+		lastScrolledSlide;
 
 	//extend default options
 	options = extend( defaults,config_options );
-
-	linotypeElement = document.getElementById(options.idSelector);
-	container = linotypeElement;
 
 	/**
 	 * @exception {ConfigurationError} If conflicting scrolling options are set
@@ -165,6 +326,289 @@ var linotype = function(config_options){
 	};
 
 	/**
+	 * Defines the scrolling speed 
+	 * @param {number} value
+	 */
+	this.setScrollingSpeed = function(value){
+	   options.scrollingSpeed = value;
+	};
+
+	/**
+	 * Adds or remove the possiblity of scrolling through sections by using the keyboard arrow keys
+	 * @param {number} value
+	 */
+	this.setKeyboardScrolling = function (value){
+		options.keyboardScrolling = value;
+	};
+
+	/**
+	 * Adds or remove the possiblity of scrolling through sections by using the mouse wheel or the trackpad. 
+	 * @param {number} value
+	 */
+	this.setMouseWheelScrolling = function (value){
+		// if(value){
+		// 	addMouseWheelHandler();
+		// }else{
+		// 	removeMouseWheelHandler();
+		// }
+	};
+
+	/**
+	 * Adds or remove the possiblity of scrolling through sections by using the mouse wheel/trackpad or touch gestures. 
+	 * @param {number} value
+	 */
+	this.setAllowScrolling = function (value){
+		// console.log("allow scrolling: ",value);
+		// if(value){
+		// 	$.fn.fullpage.setMouseWheelScrolling(true);
+		// 	addTouchHandler();
+		// }else{
+		// 	$.fn.fullpage.setMouseWheelScrolling(false);
+		// 	removeTouchHandler();
+		// }
+	};
+
+	/**
+	 * intialize a new linotype
+	 */
+	this.init = function(){
+		var docElemBody = document.getElementsByTagName('body')[0];
+
+		windowsHeight = document.documentElement.clientHeight;
+		linotypeElement = document.getElementById(options.idSelector);
+		container = linotypeElement;
+
+		this.setAllowScrolling(true);
+
+		if(options.css3){
+			options.css3 = support3d();
+		}
+
+		if(linotypeElement){
+			container.style.height='100%';
+			container.style.position='relative';
+			container.style['-ms-touch-action']='none';
+		}
+		else{
+			var oldBodyHTML = document.getElementsByTagName('body')[0].innerHTML;
+			document.getElementsByTagName('body')[0].innerHTML='<div id="superContainer">'+oldBodyHTML+'</div>';
+			container = document.getElementById('#superContainer');
+		}
+
+		//creating the navigation dots 
+		if (options.navigation) {
+			var navHTML = document.createElement('div');
+				navHTML.innerHTML = "<ul></ul>";
+				navHTML.setAttribute("id", "fullPage-nav");
+			docElemBody.appendChild(navHTML);
+
+			var nav = document.getElementById("fullPage-nav");
+			nav.style.color = options.navigationColor;
+			classie.addClass(nav,options.navigationPosition);
+		}
+
+		var sections = container.getElementsByClassName('section');
+		for(var index = 0; index < sections.length; index++){
+			var that = sections[index];
+			var $this = sections[index];
+			var slides = ($this !== 'undefined') ? $this.getElementsByClassName('slide') : 0;
+			var numSlides = slides.length;
+
+			//if no active section is defined, the 1st one will be the default one
+			if(!index && document.getElementsByClassName('section active').length === 0) {
+				classie.addClass($this,'active');
+			}
+
+			if($this.style !== undefined){
+				$this.style.height = windowsHeight + 'px';
+
+				if(options.paddingTop || options.paddingBottom){
+					$this.style.padding = options.paddingTop  + ' 0 ' + options.paddingBottom + ' 0';
+				}
+
+				if (typeof options.slidesColor[index] !==  'undefined') {
+					$this.style['background-color'] = options.slidesColor[index];
+				}
+			}
+
+			if (typeof options.anchors[index] !== 'undefined' && typeof $this === 'object' ) {
+				$this.setAttribute('data-anchor', options.anchors[index]);
+			}
+
+			if (options.navigation) {
+				var link = (options.anchors.length)? options.anchors[index]:'',
+					tooltip = (typeof options.navigationTooltips[index] !== 'undefined')? options.navigationTooltips[index] : '',
+					navToSetHTML = document.getElementById("fullPage-nav"),
+					navUL = navToSetHTML.getElementsByTagName('ul')[0],
+					newLIToAdd = document.createElement('li');
+
+				newLIToAdd.innerHTML='<a href="#' + link + '"><span></span></a></li>';
+				if(tooltip){
+					newLIToAdd.setAttribute('data-tooltip',tooltip);
+				}
+				navUL.appendChild(newLIToAdd);
+			}
+
+			// if there's any slide
+			if (numSlides > 0) {
+				var sliderWidth = numSlides * 100;
+				var slideWidth = 100 / numSlides;
+				var slidesContainerEl = document.createElement("div");
+				var slidesContainerForControlsEl = document.createElement("div");
+				slidesContainerEl.setAttribute('class','slidesContainer');
+				slidesContainerForControlsEl.setAttribute('class','slides');
+
+				elementContentWrapInner($this,slidesContainerEl);
+
+				elementContentWrapInner($this,slidesContainerForControlsEl);
+
+				$this.getElementsByClassName('slidesContainer')[0].style.width = sliderWidth + '%';
+				$this.innerHTML += '<div class="controlArrow prev"></div><div class="controlArrow next"></div>';
+
+				if(options.controlArrowColor!=='#fff'){
+					$this.getElementsByClassName('controlArrow next')[0].style['border-color'] = 'transparent transparent transparent '+options.controlArrowColor;
+					$this.getElementsByClassName('controlArrow prev')[0].style['border-color'] = 'transparent transparent transparent '+options.controlArrowColor;
+				}
+
+				if(!options.loopHorizontal){
+					elementHideCss($this.getElementsByClassName('controlArrow prev')[0]);
+				}
+
+				if(options.slidesNavigation){
+					addSlidesNavigation($this, numSlides);
+				}
+
+				// slides.each(function(index) {
+				// 	//if the slide won#t be an starting point, the default will be the first one
+				// 	if(!index && that.find('.slide.active').length == 0){
+				// 		$(this).addClass('active');
+				// 	}
+
+				// 	$(this).css('width', slideWidth + '%');
+
+				// 	if(options.verticalCentered){
+				// 		addTableClass($(this));
+				// 	}
+				// });
+			}
+			else{
+				if(options.verticalCentered){
+					addTableClass($this);
+				}
+			}
+		}
+
+	}.bind(this);
+
+	function elementHideCss(element){
+		element.style.display="none";
+	}
+	function elementContentWrapInner(element,innerElement){
+		var wrapper = element,
+			w = innerElement,
+			len = element.children.length,
+			wrapper_clone = wrapper.cloneNode(true);
+
+		wrapper.innerHTML='';
+		wrapper.appendChild(w);
+		var newFirstChild = wrapper.firstChild;
+
+		newFirstChild.innerHTML=wrapper_clone.innerHTML;
+	}
+
+	/**
+	 * Creates a landscape navigation bar with dots for horizontal sliders.
+	 @private
+	 @param {object} section - nodeelement to add navigation to
+	 @param {number} numSlides - number of slides 
+	 */
+	function addSlidesNavigation(section, numSlides){
+		console.log("addSlidesNavigation");
+		console.log("section",section);
+		section.innerHTML+= '<div class="fullPage-slidesNav"><ul></ul></div>';
+		var nav = section.getElementsByClassName('fullPage-slidesNav')[0];
+		console.log("nav",nav);
+
+		//top or bottom
+		classie.addClass(nav,options.slidesNavPosition);
+
+		for(var i=0; i< numSlides; i++){
+			nav.getElementsByTagName('ul')[0].innerHTML+='<li><a href="#"><span></span></a></li>';
+		}
+
+		//centering it
+		nav.style['margin-left'] =  '-' + (nav.offsetWidth/2) + 'px';
+classie.addClass(nav.getElementsByTagName('li')[0].getElementsByTagName('a')[0],'active');
+	}
+
+	/**
+	 * adds table style to section
+	 * @private
+	 * @param { string } element - document element
+	 */
+	function addTableClass(element){
+		classie.addClass(element,'table');
+		var slidesTableContainerEl = document.createElement("div");
+		slidesTableContainerEl.setAttribute('class','tableCell');
+		slidesTableContainerEl.setAttribute('style',"height:'" + getTableHeight(element) + "'px;");
+
+		elementContentWrapInner(element,slidesTableContainerEl);
+	}
+
+	/**
+	 * get height for table
+	 * @private
+	 * @param { string } element - document element
+	 */
+	function getTableHeight(element){
+		var sectionHeight = windowsHeight;
+
+		// if(options.paddingTop || options.paddingBottom){
+		// 	// var section = element;
+		// 	// if(!section.hasClass('section')){
+		// 	// 	section = element.closest('.section');
+		// 	// }
+
+		// 	// var paddings = parseInt(section.css('padding-top')) + parseInt(section.css('padding-bottom'));
+		// 	// sectionHeight = (windowsHeight - paddings);
+		// }
+
+		return sectionHeight;
+	}
+
+	/**
+	 * Checks for translate3d support 
+	 * @return boolean
+	 * http://stackoverflow.com/questions/5661671/detecting-transform-translate3d-support
+	 */
+	function support3d() {
+		var el = document.createElement('p'),
+			has3d,
+			transforms = {
+				'webkitTransform':'-webkit-transform',
+				'OTransform':'-o-transform',
+				'msTransform':'-ms-transform',
+				'MozTransform':'-moz-transform',
+				'transform':'transform'
+			};
+
+		// Add it to the body to get the computed style.
+		document.body.insertBefore(el, null);
+
+		for (var t in transforms) {
+			if (el.style[t] !== undefined) {
+				el.style[t] = "translate3d(1px,1px,1px)";
+				has3d = window.getComputedStyle(el).getPropertyValue(transforms[t]);
+			}
+		}
+
+		document.body.removeChild(el);
+
+		return (has3d !== undefined && has3d.length > 0 && has3d !== "none");
+	}
+
+
+	/**
 	 * return browser preview for transforms.
 	 * @private
 	 * @param { string } translate3d - css transform propert
@@ -208,20 +652,17 @@ var linotype = function(config_options){
 			container.style.top = -top;
 		}
 	}
-
-
-
 };
 
 module.exports = linotype;
 
 
-  // If there is a window object, that at least has a document property,
-  // define linotype
-  if ( typeof window === "object" && typeof window.document === "object" ) {
-    window.linotype = linotype;
-  }
-},{"classie":9,"events":4,"util":8,"util-extend":11}],4:[function(require,module,exports){
+// If there is a window object, that at least has a document property,
+// define linotype
+if ( typeof window === "object" && typeof window.document === "object" ) {
+	window.linotype = linotype;
+}
+},{"classie":12,"events":7,"util":11,"util-extend":14}],7:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -523,7 +964,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],5:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -548,7 +989,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],6:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -613,14 +1054,14 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],7:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],8:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -1210,7 +1651,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require("FWaASH"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":7,"FWaASH":6,"inherits":5}],9:[function(require,module,exports){
+},{"./support/isBuffer":10,"FWaASH":9,"inherits":8}],12:[function(require,module,exports){
 /*
  * classie
  * http://github.amexpub.com/modules/classie
@@ -1220,7 +1661,7 @@ function hasOwnProperty(obj, prop) {
 
 module.exports = require('./lib/classie');
 
-},{"./lib/classie":10}],10:[function(require,module,exports){
+},{"./lib/classie":13}],13:[function(require,module,exports){
 /*!
  * classie - class helper functions
  * from bonzo https://github.com/ded/bonzo
@@ -1303,7 +1744,7 @@ module.exports = require('./lib/classie');
   if ( typeof window === "object" && typeof window.document === "object" ) {
     window.classie = classie;
   }
-},{}],11:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -1338,4 +1779,4 @@ function extend(origin, add) {
   return origin;
 }
 
-},{}]},{},[1])
+},{}]},{},[1,2,3,4])

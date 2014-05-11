@@ -19,7 +19,7 @@ var linotypeFactory = {
 		}
 	};
 
-describe('Linotype - paige compositor', function () {
+describe('Linotype - page compositor', function () {
 
 	describe('Customization and overwriteable options', function () {
 		var linotypeTest;
@@ -75,6 +75,10 @@ describe('Linotype - paige compositor', function () {
 				expect(e.name).to.equal("RangeError");
 			}
 		});
+	});
+
+	describe('It should have required UI/UX elements',function(){
+		it('should have at least one section',function(){});
 	});
 
 });

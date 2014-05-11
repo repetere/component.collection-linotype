@@ -89,13 +89,17 @@ var linotype = function(config_options){
 			this.message = message || "Linotype Configuration Error";
 		},
 		scrollDelay = (typeof config_options === "object" && typeof config_options.scrollDelay === "number") ? config_options.scrollDelay : 600,
-		container;
+		container,
+		slideMoving = false,
+		isTablet = navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry|Windows Phone)/),
+		windowsHeight,
+		isMoving = false,
+		isResizing = false,
+		lastScrolledDestiny,
+		lastScrolledSlide;
 
 	//extend default options
 	options = extend( defaults,config_options );
-
-	linotypeElement = document.getElementById(options.idSelector);
-	container = linotypeElement;
 
 	/**
 	 * @exception {ConfigurationError} If conflicting scrolling options are set
@@ -163,6 +167,289 @@ var linotype = function(config_options){
 	};
 
 	/**
+	 * Defines the scrolling speed 
+	 * @param {number} value
+	 */
+	this.setScrollingSpeed = function(value){
+	   options.scrollingSpeed = value;
+	};
+
+	/**
+	 * Adds or remove the possiblity of scrolling through sections by using the keyboard arrow keys
+	 * @param {number} value
+	 */
+	this.setKeyboardScrolling = function (value){
+		options.keyboardScrolling = value;
+	};
+
+	/**
+	 * Adds or remove the possiblity of scrolling through sections by using the mouse wheel or the trackpad. 
+	 * @param {number} value
+	 */
+	this.setMouseWheelScrolling = function (value){
+		// if(value){
+		// 	addMouseWheelHandler();
+		// }else{
+		// 	removeMouseWheelHandler();
+		// }
+	};
+
+	/**
+	 * Adds or remove the possiblity of scrolling through sections by using the mouse wheel/trackpad or touch gestures. 
+	 * @param {number} value
+	 */
+	this.setAllowScrolling = function (value){
+		// console.log("allow scrolling: ",value);
+		// if(value){
+		// 	$.fn.fullpage.setMouseWheelScrolling(true);
+		// 	addTouchHandler();
+		// }else{
+		// 	$.fn.fullpage.setMouseWheelScrolling(false);
+		// 	removeTouchHandler();
+		// }
+	};
+
+	/**
+	 * intialize a new linotype
+	 */
+	this.init = function(){
+		var docElemBody = document.getElementsByTagName('body')[0];
+
+		windowsHeight = document.documentElement.clientHeight;
+		linotypeElement = document.getElementById(options.idSelector);
+		container = linotypeElement;
+
+		this.setAllowScrolling(true);
+
+		if(options.css3){
+			options.css3 = support3d();
+		}
+
+		if(linotypeElement){
+			container.style.height='100%';
+			container.style.position='relative';
+			container.style['-ms-touch-action']='none';
+		}
+		else{
+			var oldBodyHTML = document.getElementsByTagName('body')[0].innerHTML;
+			document.getElementsByTagName('body')[0].innerHTML='<div id="superContainer">'+oldBodyHTML+'</div>';
+			container = document.getElementById('#superContainer');
+		}
+
+		//creating the navigation dots 
+		if (options.navigation) {
+			var navHTML = document.createElement('div');
+				navHTML.innerHTML = "<ul></ul>";
+				navHTML.setAttribute("id", "fullPage-nav");
+			docElemBody.appendChild(navHTML);
+
+			var nav = document.getElementById("fullPage-nav");
+			nav.style.color = options.navigationColor;
+			classie.addClass(nav,options.navigationPosition);
+		}
+
+		var sections = container.getElementsByClassName('section');
+		for(var index = 0; index < sections.length; index++){
+			var that = sections[index];
+			var $this = sections[index];
+			var slides = ($this !== 'undefined') ? $this.getElementsByClassName('slide') : 0;
+			var numSlides = slides.length;
+
+			//if no active section is defined, the 1st one will be the default one
+			if(!index && document.getElementsByClassName('section active').length === 0) {
+				classie.addClass($this,'active');
+			}
+
+			if($this.style !== undefined){
+				$this.style.height = windowsHeight + 'px';
+
+				if(options.paddingTop || options.paddingBottom){
+					$this.style.padding = options.paddingTop  + ' 0 ' + options.paddingBottom + ' 0';
+				}
+
+				if (typeof options.slidesColor[index] !==  'undefined') {
+					$this.style['background-color'] = options.slidesColor[index];
+				}
+			}
+
+			if (typeof options.anchors[index] !== 'undefined' && typeof $this === 'object' ) {
+				$this.setAttribute('data-anchor', options.anchors[index]);
+			}
+
+			if (options.navigation) {
+				var link = (options.anchors.length)? options.anchors[index]:'',
+					tooltip = (typeof options.navigationTooltips[index] !== 'undefined')? options.navigationTooltips[index] : '',
+					navToSetHTML = document.getElementById("fullPage-nav"),
+					navUL = navToSetHTML.getElementsByTagName('ul')[0],
+					newLIToAdd = document.createElement('li');
+
+				newLIToAdd.innerHTML='<a href="#' + link + '"><span></span></a></li>';
+				if(tooltip){
+					newLIToAdd.setAttribute('data-tooltip',tooltip);
+				}
+				navUL.appendChild(newLIToAdd);
+			}
+
+			// if there's any slide
+			if (numSlides > 0) {
+				var sliderWidth = numSlides * 100;
+				var slideWidth = 100 / numSlides;
+				var slidesContainerEl = document.createElement("div");
+				var slidesContainerForControlsEl = document.createElement("div");
+				slidesContainerEl.setAttribute('class','slidesContainer');
+				slidesContainerForControlsEl.setAttribute('class','slides');
+
+				elementContentWrapInner($this,slidesContainerEl);
+
+				elementContentWrapInner($this,slidesContainerForControlsEl);
+
+				$this.getElementsByClassName('slidesContainer')[0].style.width = sliderWidth + '%';
+				$this.innerHTML += '<div class="controlArrow prev"></div><div class="controlArrow next"></div>';
+
+				if(options.controlArrowColor!=='#fff'){
+					$this.getElementsByClassName('controlArrow next')[0].style['border-color'] = 'transparent transparent transparent '+options.controlArrowColor;
+					$this.getElementsByClassName('controlArrow prev')[0].style['border-color'] = 'transparent transparent transparent '+options.controlArrowColor;
+				}
+
+				if(!options.loopHorizontal){
+					elementHideCss($this.getElementsByClassName('controlArrow prev')[0]);
+				}
+
+				if(options.slidesNavigation){
+					addSlidesNavigation($this, numSlides);
+				}
+
+				// slides.each(function(index) {
+				// 	//if the slide won#t be an starting point, the default will be the first one
+				// 	if(!index && that.find('.slide.active').length == 0){
+				// 		$(this).addClass('active');
+				// 	}
+
+				// 	$(this).css('width', slideWidth + '%');
+
+				// 	if(options.verticalCentered){
+				// 		addTableClass($(this));
+				// 	}
+				// });
+			}
+			else{
+				if(options.verticalCentered){
+					addTableClass($this);
+				}
+			}
+		}
+
+	}.bind(this);
+
+	function elementHideCss(element){
+		element.style.display="none";
+	}
+	function elementContentWrapInner(element,innerElement){
+		var wrapper = element,
+			w = innerElement,
+			len = element.children.length,
+			wrapper_clone = wrapper.cloneNode(true);
+
+		wrapper.innerHTML='';
+		wrapper.appendChild(w);
+		var newFirstChild = wrapper.firstChild;
+
+		newFirstChild.innerHTML=wrapper_clone.innerHTML;
+	}
+
+	/**
+	 * Creates a landscape navigation bar with dots for horizontal sliders.
+	 @private
+	 @param {object} section - nodeelement to add navigation to
+	 @param {number} numSlides - number of slides 
+	 */
+	function addSlidesNavigation(section, numSlides){
+		console.log("addSlidesNavigation");
+		console.log("section",section);
+		section.innerHTML+= '<div class="fullPage-slidesNav"><ul></ul></div>';
+		var nav = section.getElementsByClassName('fullPage-slidesNav')[0];
+		console.log("nav",nav);
+
+		//top or bottom
+		classie.addClass(nav,options.slidesNavPosition);
+
+		for(var i=0; i< numSlides; i++){
+			nav.getElementsByTagName('ul')[0].innerHTML+='<li><a href="#"><span></span></a></li>';
+		}
+
+		//centering it
+		nav.style['margin-left'] =  '-' + (nav.offsetWidth/2) + 'px';
+classie.addClass(nav.getElementsByTagName('li')[0].getElementsByTagName('a')[0],'active');
+	}
+
+	/**
+	 * adds table style to section
+	 * @private
+	 * @param { string } element - document element
+	 */
+	function addTableClass(element){
+		classie.addClass(element,'table');
+		var slidesTableContainerEl = document.createElement("div");
+		slidesTableContainerEl.setAttribute('class','tableCell');
+		slidesTableContainerEl.setAttribute('style',"height:'" + getTableHeight(element) + "'px;");
+
+		elementContentWrapInner(element,slidesTableContainerEl);
+	}
+
+	/**
+	 * get height for table
+	 * @private
+	 * @param { string } element - document element
+	 */
+	function getTableHeight(element){
+		var sectionHeight = windowsHeight;
+
+		// if(options.paddingTop || options.paddingBottom){
+		// 	// var section = element;
+		// 	// if(!section.hasClass('section')){
+		// 	// 	section = element.closest('.section');
+		// 	// }
+
+		// 	// var paddings = parseInt(section.css('padding-top')) + parseInt(section.css('padding-bottom'));
+		// 	// sectionHeight = (windowsHeight - paddings);
+		// }
+
+		return sectionHeight;
+	}
+
+	/**
+	 * Checks for translate3d support 
+	 * @return boolean
+	 * http://stackoverflow.com/questions/5661671/detecting-transform-translate3d-support
+	 */
+	function support3d() {
+		var el = document.createElement('p'),
+			has3d,
+			transforms = {
+				'webkitTransform':'-webkit-transform',
+				'OTransform':'-o-transform',
+				'msTransform':'-ms-transform',
+				'MozTransform':'-moz-transform',
+				'transform':'transform'
+			};
+
+		// Add it to the body to get the computed style.
+		document.body.insertBefore(el, null);
+
+		for (var t in transforms) {
+			if (el.style[t] !== undefined) {
+				el.style[t] = "translate3d(1px,1px,1px)";
+				has3d = window.getComputedStyle(el).getPropertyValue(transforms[t]);
+			}
+		}
+
+		document.body.removeChild(el);
+
+		return (has3d !== undefined && has3d.length > 0 && has3d !== "none");
+	}
+
+
+	/**
 	 * return browser preview for transforms.
 	 * @private
 	 * @param { string } translate3d - css transform propert
@@ -206,19 +493,16 @@ var linotype = function(config_options){
 			container.style.top = -top;
 		}
 	}
-
-
-
 };
 
 module.exports = linotype;
 
 
-  // If there is a window object, that at least has a document property,
-  // define linotype
-  if ( typeof window === "object" && typeof window.document === "object" ) {
-    window.linotype = linotype;
-  }
+// If there is a window object, that at least has a document property,
+// define linotype
+if ( typeof window === "object" && typeof window.document === "object" ) {
+	window.linotype = linotype;
+}
 },{"classie":9,"events":4,"util":8,"util-extend":11}],4:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
