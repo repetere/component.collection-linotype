@@ -344,9 +344,14 @@ var domhelper = {
 	insertAllBefore: function(element,elementsToInsert){
 		var parentElement = element.parentNode;
 		// console.log("parentElement",parentElement,"element",element,"elementsToInsert",elementsToInsert);
-		for(var x =0; x<elementsToInsert.length; x++){
-			// console.log(x,"elementsToInsert[x]",elementsToInsert[x])
-			parentElement.insertBefore(elementsToInsert[x],element);
+		if(elementsToInsert.length){
+			for(var x =0; x<elementsToInsert.length; x++){
+				// console.log(x,"elementsToInsert[x]",elementsToInsert[x])
+				parentElement.insertBefore(elementsToInsert[x],element);
+			}
+		}
+		else{
+			parentElement.insertBefore(elementsToInsert,element);
 		}
 	},
 
@@ -354,10 +359,15 @@ var domhelper = {
 		var parentElement = element.parentNode;
 		var nextSibling = element.nextSibling;
 		// console.log("parentElement",parentElement,"element",element,"elementsToInsert",elementsToInsert);
-		for(var x =0; x<elementsToInsert.length; x++){
-			// console.log(x,"elementsToInsert[x]",elementsToInsert[x])
-			// elementsToInsert[x].style.background="green";
-			parentElement.insertBefore(elementsToInsert[x],nextSibling);
+		if(elementsToInsert.length){
+			for(var x =0; x<elementsToInsert.length; x++){
+				// console.log(x,"elementsToInsert[x]",elementsToInsert[x])
+				// elementsToInsert[x].style.background="green";
+				parentElement.insertBefore(elementsToInsert[x],nextSibling);
+			}
+		}
+		else{
+			parentElement.insertBefore(elementsToInsert,nextSibling);
 		}
 	},
 
@@ -813,7 +823,6 @@ var linotype = function(config_options){
 		}
 
 		//moving the menu outside the main container (avoid problems with fixed positions when using CSS3 tranforms)
-		console.log("options.menu",options.menu);
 		if(options.menu && options.css3){
 			document.getElementsByTagName('body')[0].appendChild(options.menu);
 		}
@@ -948,19 +957,18 @@ var linotype = function(config_options){
 	 * Scrolls the slider to the given slide destination for the given section
 	 */
 	function scrollSlider(section, slide){
-		console.log("scrollSlider");
-		// if(typeof slide != 'undefined'){
-		// 	var slides = section.find('.slides');
-		// 	var destiny =  slides.find('[data-anchor="'+slide+'"]');
+		if(typeof slide !== 'undefined'){
+			var slides = section.querySelectorAll('.slides');
+			var destiny =  slides.querySelector('[data-anchor="'+slide+'"]');
 
-		// 	if(!destiny.length){
-		// 		destiny = slides.find('.slide').eq(slide);
-		// 	}
+			if(!destiny.length){
+				destiny = slides.querySelectorAll('.slide')[slide];
+			}
 
-		// 	if(destiny.length){
-		// 		landscapeScroll(slides, destiny);
-		// 	}
-		// }
+			if(destiny.length){
+				landscapeScroll(slides, destiny);
+			}
+		}
 	}
 
 	function moveSlide(direction){
@@ -1000,27 +1008,28 @@ var linotype = function(config_options){
 	}
 
 	function scrollPage(element, callback, isMovementUp){
-		console.log("scrollPage");
-		console.log("element",element);
-		var scrollOptions = {}, scrolledElement;
-		var dest = element.getBoundingClientRect();
+		var scrollOptions = {}, scrolledElement,
+			dest = element.getBoundingClientRect();
 		if(typeof dest === "undefined"){ return; } //there's no element to scroll, leaving the function
-		var dtop = dest.top;
-		var yMovement = getYmovement(element);
-		var anchorLink  = element.getAttribute('data-anchor');
-		var sectionIndex = nodelistToArray(document.getElementsByClassName('section'),true).indexOf(element.outerHTML); ///element.index('.section');
-		var activeSlide = element.querySelector('.slide.active');
-		var activeSection = document.querySelector('.section.active');
-		var leavingSection = nodelistToArray(document.getElementsByClassName('section'),true).indexOf(activeSection.outerHTML) +1;//activeSection.index('.section') + 1;
+		var dtop = dest.top,
+			yMovement = getYmovement(element),
+			anchorLink  = element.getAttribute('data-anchor'),
+			sectionIndex = nodelistToArray(document.getElementsByClassName('section'),true).indexOf(element.outerHTML), ///element.index('.section');
+			activeSlide = element.querySelector('.slide.active'),
+			activeSection = document.querySelector('.section.active'),
+			leavingSection = nodelistToArray(document.getElementsByClassName('section'),true).indexOf(activeSection.outerHTML) +1,//activeSection.index('.section') + 1;
+			slideAnchorLink = null,
+			slideIndex = null,
+			localIsResizing = isResizing;//caching the value of isResizing at the momment the function is called 
+			//because it will be checked later inside a setTimeout and the value might change
 
-		//caching the value of isResizing at the momment the function is called 
-		//because it will be checked later inside a setTimeout and the value might change
-		var localIsResizing = isResizing;
+
 
 		if(activeSlide !== null && activeSlide.length){
-			var slideAnchorLink = activeSlide.getAttribute('data-anchor');
-			var slideIndex = nodelistToArray(element.getElementsByClassName('slide'),true).indexOf(activeSlide.outerHTML);//activeSlide.index();
+			slideAnchorLink = activeSlide.getAttribute('data-anchor');
+			slideIndex = nodelistToArray(element.getElementsByClassName('slide'),true).indexOf(activeSlide.outerHTML);//activeSlide.index();
 		}
+		// console.log("slideIndex",slideIndex);
 
 		// If continuousVertical && we need to wrap around
 		if (options.autoScrolling && options.continuousVertical && typeof (isMovementUp) !== "undefined" &&
@@ -1052,95 +1061,172 @@ var linotype = function(config_options){
 			dtop = dest.top;
 			yMovement = getYmovement(element);
 		}
-			silentScroll(element.getBoundingClientRect().top);
 
-		// element.addClass('active').siblings().removeClass('active');
+		var elementCol = document.getElementsByClassName('section');
+		removeAllClassAndToggle(element,elementCol,'active');
 
-		// //preventing from activating the MouseWheelHandler event
-		// //more than once if the page is scrolling
-		// isMoving = true;
+		//preventing from activating the MouseWheelHandler event
+		//more than once if the page is scrolling
+		isMoving = true;
 
-		// if(typeof anchorLink !== 'undefined'){
-		// 	setURLHash(slideIndex, slideAnchorLink, anchorLink);
-		// }
+		if(typeof anchorLink !== 'undefined'){
+			setURLHash(slideIndex, slideAnchorLink, anchorLink);
+		}
 
-		// if(options.autoScrolling){
-		// 	scrollOptions['top'] = -dtop;
-		// 	scrolledElement = container.selector;
-		// }else{
-		// 	scrollOptions['scrollTop'] = dtop;
-		// 	scrolledElement = 'html, body';
-		// }
+		if(options.autoScrolling){
+			scrollOptions.top = -dtop;
+			scrolledElement = container.selector;
+		}else{
+			scrollOptions.scrollTop = dtop;
+			scrolledElement = 'html, body';
+		}
 
-		// // Fix section order after continuousVertical changes have been animated
-		// var continuousVerticalFixSectionOrder = function () {
-		// 	// If continuousVertical is in effect (and autoScrolling would also be in effect then), 
-		// 	// finish moving the elements around so the direct navigation will function more simply
-		// 	if (!wrapAroundElements || !wrapAroundElements.length) {
-		// 		return;
-		// 	}
+		// Fix section order after continuousVertical changes have been animated
+		var continuousVerticalFixSectionOrder = function () {
+			// If continuousVertical is in effect (and autoScrolling would also be in effect then), 
+			// finish moving the elements around so the direct navigation will function more simply
+			if (!wrapAroundElements || !wrapAroundElements.length) {
+				return;
+			}
 
-		// 	if (isMovementUp) {
-		// 		$('.section:first').before(wrapAroundElements);
-		// 	}
-		// 	else {
-		// 		$('.section:last').after(wrapAroundElements);
-		// 	}
+			if (isMovementUp) {
+				insertAllBefore(document.querySelector('.section').parentNode.firstElementChild,wrapAroundElements);
+				// $('.section:first').before(wrapAroundElements);
+			}
+			else {
+				insertAllAfter(document.querySelector('.section').parentNode.lastElementChild,wrapAroundElements);
+				// $('.section:last').after(wrapAroundElements);
+			}
 
-		// 	silentScroll($('.section.active').position().top);
-		// };
+			silentScroll(activeSection.getBoundingClientRect().top); // silentScroll($('.section.active').position().top);
+		};
 
 
-		// // Use CSS3 translate functionality or...
-		// if (options.css3 && options.autoScrolling) {
+		// Use CSS3 translate functionality or...
+		if (options.css3 && options.autoScrolling) {
 
-		// 	//callback (onLeave) if the site is not just resizing and readjusting the slides
-		// 	$.isFunction(options.onLeave) && !localIsResizing && options.onLeave.call(this, leavingSection, (sectionIndex + 1), yMovement);
+			//callback (onLeave) if the site is not just resizing and readjusting the slides
+			if((typeof options.onLeave ==='function') && !localIsResizing ){
+				options.onLeave.call(leavingSection, (sectionIndex + 1), yMovement);
+			}
 
-		// 	var translate3d = 'translate3d(0px, -' + dtop + 'px, 0px)';
-		// 	transformContainer(translate3d, true);
+			var translate3d = 'translate3d(0px, -' + dtop + 'px, 0px)';
+			transformContainer(translate3d, true);
 
-		// 	setTimeout(function () {
-		// 		//fix section order from continuousVertical
-		// 		continuousVerticalFixSectionOrder();
+			var t = setTimeout(function () {
+				//fix section order from continuousVertical
+				continuousVerticalFixSectionOrder();
+				//callback (afterLoad) if the site is not just resizing and readjusting the slides
+				if((typeof options.afterLoad ==='function') && !localIsResizing) {
+					options.afterLoad.call( anchorLink, (sectionIndex + 1));
+				}
 
-		// 		//callback (afterLoad) 	if the site is not just resizing and readjusting the slides
-		// 		$.isFunction(options.afterLoad) && !localIsResizing && options.afterLoad.call(this, anchorLink, (sectionIndex + 1));
+				setTimeout(function () {
+					isMoving = false;
+					if(typeof callback ==='function'){callback.call(this);}
+				}, scrollDelay);
+			}, options.scrollingSpeed);
+		}
+		else { // ... use jQuery animate 
 
-		// 		setTimeout(function () {
-		// 			isMoving = false;
-		// 			$.isFunction(callback) && callback.call(this);
-		// 		}, scrollDelay);
-		// 	}, options.scrollingSpeed);
-		// } else { // ... use jQuery animate 
+			//callback (onLeave) if the site is not just resizing and readjusting the slides
+			if((typeof options.onLeave ==='function') && !localIsResizing){
+				options.onLeave.call(leavingSection, (sectionIndex + 1), yMovement);
+			}
 
-		// 	//callback (onLeave) if the site is not just resizing and readjusting the slides
-		// 	$.isFunction(options.onLeave) && !localIsResizing && options.onLeave.call(this, leavingSection, (sectionIndex + 1), yMovement);
+			container.style.top = -top+'px';
+			//fix section order from continuousVertical
+			continuousVerticalFixSectionOrder();
 
-		// 	$(scrolledElement).animate(
-		// 		scrollOptions
-		// 	, options.scrollingSpeed, options.easing, function () {
-		// 		//fix section order from continuousVertical
-		// 		continuousVerticalFixSectionOrder();
+			//callback (afterLoad) if the site is not just resizing and readjusting the slides
+			if((typeof options.afterLoad ==='function') && !localIsResizing){
+				options.afterLoad.call( anchorLink, (sectionIndex + 1));
+			}
 
-		// 		//callback (afterLoad) if the site is not just resizing and readjusting the slides
-		// 		$.isFunction(options.afterLoad) && !localIsResizing && options.afterLoad.call(this, anchorLink, (sectionIndex + 1));
+			setTimeout(function () {
+				isMoving = false;
+				if(typeof callback ==='function'){callback.call(this);}
+			}, scrollDelay);
+		}
 
-		// 		setTimeout(function () {
-		// 			isMoving = false;
-		// 			$.isFunction(callback) && callback.call(this);
-		// 		}, scrollDelay);
-		// 	});
-		// }
+		//flag to avoid callingn `scrollPage()` twice in case of using anchor links
+		lastScrolledDestiny = anchorLink;
 
-		// //flag to avoid callingn `scrollPage()` twice in case of using anchor links
-		// lastScrolledDestiny = anchorLink;
+		//avoid firing it twice (as it does also on scroll)
+		if(options.autoScrolling){
+			activateMenuElement(anchorLink);
+			activateNavDots(anchorLink, sectionIndex);
+		}
+	}
 
-		// //avoid firing it twice (as it does also on scroll)
-		// if(options.autoScrolling){
-		// 	activateMenuElement(anchorLink);
-		// 	activateNavDots(anchorLink, sectionIndex);
-		// }
+	function removeAllClassAndToggle(element,elementCollection,toggleClass){
+		//updating the active class
+		for(var h =0; h <elementCollection.length; h++){
+			classie.removeClass(elementCollection[h],toggleClass);
+		}
+		classie.addClass(element,toggleClass);
+	}
+
+	/**
+	 * Sets the URL hash for a section with slides
+	 * @private
+	 */
+	function setURLHash(slideIndex, slideAnchor, anchorLink){
+		var sectionHash = '';
+
+		if(options.anchors.length){
+
+			//isn't it the first slide?
+			if(slideIndex){
+				if(typeof anchorLink !== 'undefined'){
+					sectionHash = anchorLink;
+				}
+
+				//slide without anchor link? We take the index instead.
+				if(typeof slideAnchor === 'undefined'){
+					slideAnchor = slideIndex;
+				}
+
+				lastScrolledSlide = slideAnchor;
+				location.hash = sectionHash + '/' + slideAnchor;
+
+			//first slide won't have slide anchor, just the section one
+			}else if(typeof slideIndex !== 'undefined'){
+				lastScrolledSlide = slideAnchor;
+				location.hash = anchorLink;
+			}
+
+			//section without slides
+			else{
+				location.hash = anchorLink;
+			}
+		}
+	}
+
+	/**
+	 * Activating the website navigation dots according to the given slide name.
+	 */
+	function activateNavDots(name, sectionIndex){
+		if(options.navigation){
+			var fullpageNavID = document.getElementById('fullPage-nav');
+			classie.removeClass(fullpageNavID.querySelector('.active'),'active');
+			if(name){
+				classie.addClass(fullpageNavID.querySelector('a[href="#' + name + '"]'),'active');
+			}
+			else{
+				classie.addClass(fullpageNavID.querySelector('li')[sectionIndex].querySelector('a'),'active');
+			}
+		}
+	}
+
+	/**
+	 * Activating the website main menu elements according to the given slide name.
+	 */
+	function activateMenuElement(name){
+		if(options.menu){
+			classie.removeClass(options.menu.querySelector('.active'),'active');
+			classie.addClass(options.menu.querySelector('[data-menuanchor="'+name+'"]'),'active');
+		}
 	}
 
 	/**
@@ -1416,7 +1502,6 @@ var linotype = function(config_options){
 	 * @private
 	 */
 	function transformContainer(translate3d, animated){
-		console.log("transformContainer");
 		// container.toggleClass('easing', animated);
 		var transformsObject = getTransforms(translate3d);
 		classie.toggle( container, 'easing' );
