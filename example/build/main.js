@@ -14,7 +14,126 @@ var linotype = require('../../index');
 
 module.exports = require('./lib/linotype');
 
-},{"./lib/linotype":3}],3:[function(require,module,exports){
+},{"./lib/linotype":4}],3:[function(require,module,exports){
+/*
+ * linotype
+ * https://github.com/typesettin/linotype
+ * @author yaw joseph etse
+ * Copyright (c) 2014 Typesettin. All rights reserved.
+ */
+
+'use strict';
+
+// var classie = require('classie'),
+// 	extend = require('util-extend'),
+// 	events = require('events'),
+// 	util = require('util');
+
+/**
+ * A module that adds simple dom utility functionality.
+ * @author yaw joseph etse
+ * @constructor
+ */
+
+var domhelper = {
+	/**
+	 * converts nodelists to arrays
+	 * @param {node} nl - html dom element
+	 * @return { array} array of html nodes
+	 * @method
+	 */
+	nodelistToArray: function(nl,useStrings){
+		var arr = [];
+		for (var i = 0, ref = arr.length = nl.length; i < ref; i++) {
+			arr[i] = (useStrings) ? nl[i].outerHTML : nl[i];
+		}
+		return arr;
+    },
+
+	/**
+	 * Returns cloaset DOM element.
+	 * @param {node} element - html dom element
+	 * @return {node} - closet node element
+	 * @method
+	 */
+    closetElement: function(element){
+		if(typeof element.length === 'number'){
+			return undefined;
+		}
+		var matches = this.nodelistToArray(document.querySelectorAll(element.nodeName+'.'+element.className.trim().split(" ").join("."))),
+			cleanMatches = [];
+		// console.log("matches",matches.length,matches);
+
+		for (var x =0; x < matches.length; x++){
+			// console.log('x',x,'element',element,'matches[x]',matches[x],'isEqualNode',matches[x].isEqualNode(element),'compareDocumentPosition',element.compareDocumentPosition(matches[x]));
+			if(element.compareDocumentPosition(matches[x])<4 && !matches[x].isEqualNode(element)){
+				cleanMatches.push(matches[x]);
+			}
+		}
+
+		function compareNumbers(a, b) {
+			return a.compareDocumentPosition( b ) - b.compareDocumentPosition( a );
+		}
+		// console.log("matches cleaned",cleanMatches.length,cleanMatches);
+		// console.log("matches sorted",cleanMatches.sort(compareNumbers));
+		return cleanMatches[0];
+	},
+
+	/**
+	 * Hides DOM elements.
+	 * @method
+	 * @param {node} element - html dom element
+	 */
+	elementHideCss: function(element){
+		element.style.display="none";
+	},
+
+	/**
+	 * Wraps inner elements
+	 * @method
+	 * @param {node} element - html dom element
+	 * @param {node} innerElement - element to wrap html dom element
+	 */
+	elementContentWrapInner: function(element,innerElement){
+		var wrapper = element,
+			w = innerElement,
+			len = element.children.length,
+			wrapper_clone = wrapper.cloneNode(true);
+
+		wrapper.innerHTML='';
+		wrapper.appendChild(w);
+		var newFirstChild = wrapper.firstChild;
+
+		newFirstChild.innerHTML=wrapper_clone.innerHTML;
+	},
+
+	unwrapElement: function(element){
+		var parentNodeElem = element.parentNode;
+		if(parentNodeElem.nodeName !== "BODY"){
+			var parentParentNodeElem = parentNodeElem.parentNode;
+			parentParentNodeElem.innerHTML='';
+			parentParentNodeElem.appendChild(element);
+		}
+	},
+	onWindowLoaded: function(callback){
+		var readyStateCheckInterval = setInterval(function() {
+		    if (document.readyState === "complete") {
+		        callback();
+		        clearInterval(readyStateCheckInterval);
+		    }
+		}, 10);
+	}
+
+};
+
+module.exports = domhelper;
+
+// If there is a window object, that at least has a document property,
+// define linotype
+if ( typeof window === "object" && typeof window.document === "object" ) {
+	window.domhelper = domhelper;
+}
+},{}],4:[function(require,module,exports){
 /*
  * linotype
  * https://github.com/typesettin/linotype
@@ -27,6 +146,7 @@ module.exports = require('./lib/linotype');
 var classie = require('classie'),
 	extend = require('util-extend'),
 	events = require('events'),
+	domhelper = require('./domhelper'),
 	util = require('util');
 
 /**
@@ -96,7 +216,9 @@ var linotype = function(config_options){
 		isMoving = false,
 		isResizing = false,
 		lastScrolledDestiny,
-		lastScrolledSlide;
+		lastScrolledSlide,
+		scrollId,
+		isScrolling = false;
 
 	//extend default options
 	options = extend( defaults,config_options );
@@ -168,7 +290,7 @@ var linotype = function(config_options){
 
 	/**
 	 * Defines the scrolling speed 
-	 * @param {number} value
+	 * @param {number} value - set the scrolling speed
 	 */
 	this.setScrollingSpeed = function(value){
 	   options.scrollingSpeed = value;
@@ -319,18 +441,18 @@ var linotype = function(config_options){
 					addSlidesNavigation($this, numSlides);
 				}
 
-				// slides.each(function(index) {
-				// 	//if the slide won#t be an starting point, the default will be the first one
-				// 	if(!index && that.find('.slide.active').length == 0){
-				// 		$(this).addClass('active');
-				// 	}
+				for(var i = 0; i< numSlides;i++){
+					//if the slide won#t be an starting point, the default will be the first one
+					if(!i && $this.getElementsByClassName('slide active').length ===0){
+						classie.addClass($this.getElementsByClassName('slide')[0],'active');
+					}
 
-				// 	$(this).css('width', slideWidth + '%');
+					$this.getElementsByClassName('slide')[i].style.width=slideWidth + '%';
 
-				// 	if(options.verticalCentered){
-				// 		addTableClass($(this));
-				// 	}
-				// });
+					if(options.verticalCentered){
+						addTableClass($this.getElementsByClassName('slide')[i]);
+					}
+				}
 			}
 			else{
 				if(options.verticalCentered){
@@ -339,22 +461,261 @@ var linotype = function(config_options){
 			}
 		}
 
+		this.setup();
+
 	}.bind(this);
 
-	function elementHideCss(element){
-		element.style.display="none";
+	/**
+	 * finalizing the module for events
+	 */
+	this.setup = function(){
+		this.setAutoScrolling(options.autoScrolling);
+		var nav = document.getElementById("fullPage-nav");
+
+		//the starting point is a slide? 
+		var activeSlide = document.getElementsByClassName('section active')[0].getElementsByClassName(' slide active')[0];
+
+		// console.log("activeSlide",activeSlide);
+		if( typeof activeSlide !== 'undefined' && activeSlide.length  &&
+			( nodelistToArray(document.getElementsByClassName('section'),true).indexOf(activeSlide.outerHTML)/* $('.section.active').index('.section')*/ !== 0 ||
+			( nodelistToArray(document.getElementsByClassName('section'),true).indexOf(activeSlide.outerHTML) /* $('.section.active').index('.section')*/ === 0 )/*&& activeSlide.index() !== 0 */)
+			){
+			var prevScrollingSpeepd = options.scrollingSpeed;
+			this.setScrollingSpeed(0);
+			landscapeScroll(document.getElementsByClassName('section active').getElementsByClassName('slides') , activeSlide);
+			this.setScrollingSpeed(prevScrollingSpeepd);
+		}
+
+		// //fixed elements need to be moved out of the plugin container due to problems with CSS3.
+		if(options.fixedElements && options.css3){
+			document.getElementsByTagName('body')[0].appendChild(options.fixedElements);
+		}
+
+		//vertical centered of the navigation + first bullet active
+		if(options.navigation){
+			nav.style['margin-top'] = '-' + (nav.offsetHeight/2) + 'px';
+			var activeSection = nodelistToArray(document.getElementsByClassName('section'),true).indexOf(document.getElementsByClassName('section active')[0].outerHTML);
+			var navigationATag = nav.getElementsByTagName('li')[activeSection].getElementsByTagName('a')[0];
+			classie.addClass(navigationATag,'active');
+		}
+
+		//moving the menu outside the main container (avoid problems with fixed positions when using CSS3 tranforms)
+		if(options.menu && options.css3){
+			document.getElementsByTagName('body').appendChild(options.menu);
+		}
+
+		if(options.scrollOverflow){
+			//after DOM and images are loaded 
+			// if (document.readyState === "complete") { init(); }
+			onWindowLoaded(function(){
+				var sections = document.getElementsByClassName('section');
+				for(var x=0; x < sections.length; x++){
+					var slides = sections[x].getElementsByClassName('slide');
+					var $this = sections[x];
+
+					if(slides.length){
+						for(var y=0; y< slides.length; y++){
+							console.log(x,y,' slides');
+							createSlimScrolling(slides[y]);
+						}
+
+					}
+					else{
+						console.log(x,'no slides');
+						createSlimScrolling($this);
+					}
+				}
+				if(typeof options.afterRender === "function"){
+					options.afterRender.call(this);
+				}
+			});
+		}
+		else{
+			if(typeof options.afterRender === "function"){
+				options.afterRender.call(this);
+			}
+		}
+
+
+		// //getting the anchor link in the URL and deleting the `#`
+		// var value =  window.location.hash.replace('#', '').split('/');
+		// var destiny = value[0];
+
+		// if(destiny.length){
+		// 	var section = $('[data-anchor="'+destiny+'"]');
+
+		// 	if(!options.animateAnchor && section.length){ 
+		// 		silentScroll(section.position().top);
+		// 		$.isFunction( options.afterLoad ) && options.afterLoad.call( this, destiny, (section.index('.section') + 1));
+
+		// 		//updating the active class
+		// 		section.addClass('active').siblings().removeClass('active');
+		// 	}
+		// }
+
+
+		// $(window).on('load', function() {
+		// 	scrollToAnchor();	
+		// });
+	}.bind(this);
+
+	/**
+	 * Hides DOM elements.
+	 */
+	var elementHideCss = domhelper.elementHideCss;
+
+	/**
+	 * Wraps inner elements
+	 */
+	var elementContentWrapInner = domhelper.elementContentWrapInner;
+	var unwrapElement = domhelper.unwrapElement;
+	var onWindowLoaded = domhelper.onWindowLoaded;
+	var nodelistToArray = domhelper.nodelistToArray;
+	/**
+	 * createSlimScrolling
+	 */
+	function createSlimScrolling(element){
+		console.log('createSlimScrolling');
+		//needed to make `scrollHeight` work under Opera 12
+		element.style.overflow = 'hidden';
+		//in case element is a slide
+		// var section = element.closest('.section');
+		var scrollable = element.getElementsByClassName('scrollable'),contentHeight;
+/*
+
+		//if there was scroll, the contentHeight will be the one in the scrollable section
+		if(scrollable.length){
+			contentHeight = element.getElementsByClassName('scrollable')[0].scrollHeight;
+		}
+		else{
+			contentHeight = element[0].scrollHeight;
+			if(options.verticalCentered){
+				contentHeight = element.getElementsByClassName('tableCell')[0].scrollHeight;
+			}
+		}
+
+		var scrollHeight = windowsHeight - parseInt(section.style['padding-bottom'],10) - parseInt(section.style['padding-top'],10);
+
+		//needs scroll?
+		if ( contentHeight > scrollHeight) {
+			//was there already an scroll ? Updating it
+			if(scrollable.length){
+				scrollable.style.height= scrollHeight + 'px';
+				scrollable.parentNode.style.height= scrollHeight + 'px';
+			}
+			//creating the scrolling
+			else{
+				var scrollableEl = document.createElement("div");
+					scrollableEl.setAttribute('class','scrollable');
+
+				if(options.verticalCentered){
+					elementContentWrapInner(element.getElementsByClassName('tableCell'),scrollableEl);
+				}else{
+					elementContentWrapInner(element,scrollableEl);
+				}
+
+				element.find('.scrollable').slimScroll({
+					height: scrollHeight + 'px',
+					size: '10px',
+					alwaysVisible: true
+				});
+			}
+		}
+		//removing the scrolling when it is not necessary anymore
+		else{
+			var scrollablefc = element.getElementsByClassName('scrollable').children.firstChild;
+			unwrapElement(scrollablefc);
+			unwrapElement(scrollablefc);
+			// element.find('.scrollable').children().first().unwrap().unwrap();
+			// element.find('.slimScrollBar').remove();
+			var slimScrollBar = element.getElementsByClassName('slimScrollBar');
+			slimScrollBar.parentNode.removeChild(slimScrollBar);
+			// element.find('.slimScrollRail').remove();
+			var slimScrollRail = element.getElementsByClassName('slimScrollRail');
+			slimScrollRail.parentNode.removeChild(slimScrollRail);
+		}
+		//undo 
+		element.style.overflow='';
+		*/
 	}
-	function elementContentWrapInner(element,innerElement){
-		var wrapper = element,
-			w = innerElement,
-			len = element.children.length,
-			wrapper_clone = wrapper.cloneNode(true);
 
-		wrapper.innerHTML='';
-		wrapper.appendChild(w);
-		var newFirstChild = wrapper.firstChild;
+	/**
+	 * Scrolls horizontal sliders.
+	 */
+	function landscapeScroll(slides, destiny){
+		// var destinyPos = destiny.position();
+		// var slidesContainer = slides.find('.slidesContainer').parent();
+		// var slideIndex = destiny.index();
+		// var section = slides.closest('.section');
+		// var sectionIndex = section.index('.section');
+		// var anchorLink = section.data('anchor');
+		// var slidesNav = section.find('.fullPage-slidesNav');
+		// var slideAnchor = destiny.data('anchor');
 
-		newFirstChild.innerHTML=wrapper_clone.innerHTML;
+		// //caching the value of isResizing at the momment the function is called 
+		// //because it will be checked later inside a setTimeout and the value might change
+		// var localIsResizing = isResizing;
+
+		// if(options.onSlideLeave){
+		// 	var prevSlideIndex = section.find('.slide.active').index();
+		// 	var xMovement = getXmovement(prevSlideIndex, slideIndex);
+
+		// 	//if the site is not just resizing and readjusting the slides
+		// 	if(!localIsResizing){
+		// 		$.isFunction( options.onSlideLeave ) && options.onSlideLeave.call( this, anchorLink, (sectionIndex + 1), prevSlideIndex, xMovement);
+		// 	}
+		// }
+
+		// destiny.addClass('active').siblings().removeClass('active');
+
+		// if(typeof slideAnchor === 'undefined'){
+		// 	slideAnchor = slideIndex;
+		// }
+
+		// //only changing the URL if the slides are in the current section (not for resize re-adjusting)
+		// if(section.hasClass('active')){
+
+		// 	if(!options.loopHorizontal){
+		// 		//hidding it for the fist slide, showing for the rest
+		// 		section.find('.controlArrow.prev').toggle(slideIndex!=0);
+
+		// 		//hidding it for the last slide, showing for the rest
+		// 		section.find('.controlArrow.next').toggle(!destiny.is(':last-child'));
+		// 	}
+
+		// 	setURLHash(slideIndex, slideAnchor, anchorLink);
+
+		// }
+
+		// if(options.css3){
+		// 	var translate3d = 'translate3d(-' + destinyPos.left + 'px, 0px, 0px)';
+
+		// 	slides.find('.slidesContainer').toggleClass('easing', options.scrollingSpeed>0).css(getTransforms(translate3d));
+
+		// 	setTimeout(function(){
+		// 		//if the site is not just resizing and readjusting the slides
+		// 		if(!localIsResizing){
+		// 			$.isFunction( options.afterSlideLoad ) && options.afterSlideLoad.call( this, anchorLink, (sectionIndex + 1), slideAnchor, slideIndex );
+		// 		}
+
+		// 		slideMoving = false;
+		// 	}, options.scrollingSpeed, options.easing);
+		// }else{
+		// 	slidesContainer.animate({
+		// 		scrollLeft : destinyPos.left
+		// 	}, options.scrollingSpeed, options.easing, function() {
+
+		// 		//if the site is not just resizing and readjusting the slides
+		// 		if(!localIsResizing){
+		// 			$.isFunction( options.afterSlideLoad ) && options.afterSlideLoad.call( this, anchorLink, (sectionIndex + 1), slideAnchor, slideIndex);
+		// 		}	
+		// 		//letting them slide again
+		// 		slideMoving = false; 
+		// 	});
+		// }
+
+		// slidesNav.find('.active').removeClass('active');
+		// slidesNav.find('li').eq(slideIndex).find('a').addClass('active');
 	}
 
 	/**
@@ -364,11 +725,8 @@ var linotype = function(config_options){
 	 @param {number} numSlides - number of slides 
 	 */
 	function addSlidesNavigation(section, numSlides){
-		console.log("addSlidesNavigation");
-		console.log("section",section);
 		section.innerHTML+= '<div class="fullPage-slidesNav"><ul></ul></div>';
 		var nav = section.getElementsByClassName('fullPage-slidesNav')[0];
-		console.log("nav",nav);
 
 		//top or bottom
 		classie.addClass(nav,options.slidesNavPosition);
@@ -379,7 +737,7 @@ var linotype = function(config_options){
 
 		//centering it
 		nav.style['margin-left'] =  '-' + (nav.offsetWidth/2) + 'px';
-classie.addClass(nav.getElementsByTagName('li')[0].getElementsByTagName('a')[0],'active');
+		classie.addClass(nav.getElementsByTagName('li')[0].getElementsByTagName('a')[0],'active');
 	}
 
 	/**
@@ -503,7 +861,7 @@ module.exports = linotype;
 if ( typeof window === "object" && typeof window.document === "object" ) {
 	window.linotype = linotype;
 }
-},{"classie":9,"events":4,"util":8,"util-extend":11}],4:[function(require,module,exports){
+},{"./domhelper":3,"classie":10,"events":5,"util":9,"util-extend":12}],5:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -805,7 +1163,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -830,7 +1188,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -895,14 +1253,14 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -1492,7 +1850,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require("FWaASH"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":7,"FWaASH":6,"inherits":5}],9:[function(require,module,exports){
+},{"./support/isBuffer":8,"FWaASH":7,"inherits":6}],10:[function(require,module,exports){
 /*
  * classie
  * http://github.amexpub.com/modules/classie
@@ -1502,7 +1860,7 @@ function hasOwnProperty(obj, prop) {
 
 module.exports = require('./lib/classie');
 
-},{"./lib/classie":10}],10:[function(require,module,exports){
+},{"./lib/classie":11}],11:[function(require,module,exports){
 /*!
  * classie - class helper functions
  * from bonzo https://github.com/ded/bonzo
@@ -1585,7 +1943,7 @@ module.exports = require('./lib/classie');
   if ( typeof window === "object" && typeof window.document === "object" ) {
     window.classie = classie;
   }
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a

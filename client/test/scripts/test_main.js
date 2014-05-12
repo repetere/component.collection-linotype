@@ -17,6 +17,7 @@ window.onload =function(){
 		slidesNavigation: true,
 		idSelector: 'fullpage',
 		navigation: true,
+		scrollOverflow: true,
 		navigationPosition: 'right',
 		navigationTooltips: ['First', 'Second', 'Third']
 	});
