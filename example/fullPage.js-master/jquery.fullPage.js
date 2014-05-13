@@ -134,6 +134,7 @@
 
 		var isTablet = navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry|Windows Phone)/);
 		var container = $(this); // for compatibity reasons for fullpage < v2.0
+		console.log("this",$(this));
 		var windowsHeight = $(window).height();
 		var isMoving = false;
 		var isResizing = false;

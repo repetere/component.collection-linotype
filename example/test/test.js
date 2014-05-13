@@ -1,10 +1,170 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/*
+ * detect-dom-ready
+ * http://github.amexpub.com/modules/detect-dom-ready
+ *
+ * Copyright (c) 2013 Amex Pub. All rights reserved.
+ */
+
 'use strict';
 
-console.log("example webapp");
+module.exports = function(grunt) {
+  grunt.initConfig({
+    jsbeautifier: {
+      files: ["<%= jshint.all %>"],
+      options: {
+        "indent_size": 2,
+        "indent_char": " ",
+        "indent_level": 0,
+        "indent_with_tabs": false,
+        "preserve_newlines": true,
+        "max_preserve_newlines": 10,
+        "brace_style": "collapse",
+        "keep_array_indentation": false,
+        "keep_function_indentation": false,
+        "space_before_conditional": true,
+        "eval_code": false,
+        "indent_case": false,
+        "unescape_strings": false,
+        "space_after_anon_function": true
+      }
+    },
+    simplemocha: {
+      options: {
+        globals: ['should'],
+        timeout: 3000,
+        ignoreLeaks: false,
+        ui: 'bdd',
+        reporter: 'tap'
+      },
+      all: {
+        src: 'test/**/*.js'
+      }
+    },
+    jshint: {
+      options: {
+        jshintrc: '.jshintrc'
+      },
+      all: [
+        'Gruntfile.js',
+        'index.js',
+        'lib/**/*.js',
+        'test/**/*.js'
+      ]
+    },
+    watch: {
+      scripts: {
+        // files: '**/*.js',
+        files: [
+          'Gruntfile.js',
+          'index.js',
+          'lib/**/*.js',
+          'test/**/*.js'
+        ],
+        tasks: ['lint', 'test'],
+        options: {
+          interrupt: true
+        }
+      }
+    }
+  });
 
-var linotype = require('../../index');
-},{"../../index":2}],2:[function(require,module,exports){
+  grunt.loadNpmTasks('grunt-simple-mocha');
+  grunt.loadNpmTasks('grunt-jsbeautifier');
+  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-watch');
+
+
+  grunt.registerTask('default', ['jshint', 'simplemocha']);
+  grunt.registerTask('lint', 'jshint');
+  grunt.registerTask('test', 'simplemocha');
+};
+
+},{}],2:[function(require,module,exports){
+/*
+ * detect-dom-ready
+ * http://github.amexpub.com/modules/detect-dom-ready
+ *
+ * Copyright (c) 2013 AmexPub. All rights reserved.
+ */
+
+module.exports = require('./lib/detect-dom-ready');
+
+},{"./lib/detect-dom-ready":3}],3:[function(require,module,exports){
+/*
+ * detect-dom-ready
+ * http://github.amexpub.com/modules
+ *
+ * Copyright (c) 2013 Amex Pub. All rights reserved.
+ */
+
+'use strict';
+
+module.exports = function(callback){
+    // if ( this.readyBound ) {return;}
+    // this.readyBound = true;
+
+    if(document.addEventListener){
+        document.addEventListener( "DOMContentLoaded", function(){
+            //remove listener
+            callback();
+            return;
+        }, false );
+    }
+    else if(document.attachEvent){
+        document.attachEvent("onreadystatechange", function(){
+            if ( document.readyState === "complete" ) {
+                //remove listener
+                callback();
+                return;
+            }
+        });
+
+        if ( document.documentElement.doScroll && window === window.top ){
+            try{
+                // If IE is used, use the trick by Diego Perini
+                // http://javascript.nwbox.com/IEContentLoaded/
+                document.documentElement.doScroll("left");
+
+            }
+            catch( error ) {
+                callback();
+                return;
+            }
+            // and execute any waiting functions
+            callback();
+            return;
+        }
+    }
+};
+},{}],4:[function(require,module,exports){
+'use strict';
+
+// console.log("example test wepps!!s");
+
+var linotype = require('../../../index'),
+	domReady = require('detect-dom-ready');
+
+
+domReady(function(){
+}); //executes after dom has loaded
+
+window.onload =function(){
+	window.Linotype = new linotype({
+		slidesColor: ['#1bbc9b', '#4BBFC3', '#7BAABE', 'whitesmoke', '#ccddff'],
+		anchors: ['firstPage', 'secondPage', '3rdPage', '4thpage', 'lastPage'],
+		slidesNavigation: true,
+		idSelector: 'fullpage',
+		navigation: true,
+		css3: true,
+		scrollOverflow: true,
+		navigationPosition: 'right',
+		navigationTooltips: ['First', 'Second', 'Third']
+	});
+
+	window.Linotype.init();
+};
+},{"../../../index":5,"detect-dom-ready":2}],5:[function(require,module,exports){
 /*
  * linotype
  * http://github.amexpub.com/modules/linotype
@@ -14,7 +174,7 @@ var linotype = require('../../index');
 
 module.exports = require('./lib/linotype');
 
-},{"./lib/linotype":5}],3:[function(require,module,exports){
+},{"./lib/linotype":8}],6:[function(require,module,exports){
 /*
  * linotype
  * https://github.com/typesettin/linotype
@@ -45,7 +205,7 @@ module.exports = Slimscroll;
 if ( typeof window === "object" && typeof window.document === "object" ) {
 	window.Slimscroll = Slimscroll;
 }
-},{}],4:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 /*
  * linotype
  * https://github.com/typesettin/linotype
@@ -237,7 +397,7 @@ module.exports = domhelper;
 if ( typeof window === "object" && typeof window.document === "object" ) {
 	window.domhelper = domhelper;
 }
-},{}],5:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /*
  * linotype
  * https://github.com/typesettin/linotype
@@ -1393,7 +1553,7 @@ module.exports = linotype;
 if ( typeof window === "object" && typeof window.document === "object" ) {
 	window.linotype = linotype;
 }
-},{"./Slimscroll":3,"./domhelper":4,"classie":11,"events":6,"util":10,"util-extend":13}],6:[function(require,module,exports){
+},{"./Slimscroll":6,"./domhelper":7,"classie":14,"events":9,"util":13,"util-extend":16}],9:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -1695,7 +1855,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],7:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -1720,7 +1880,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],8:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -1785,14 +1945,14 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],9:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],10:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -2382,7 +2542,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require("FWaASH"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":9,"FWaASH":8,"inherits":7}],11:[function(require,module,exports){
+},{"./support/isBuffer":12,"FWaASH":11,"inherits":10}],14:[function(require,module,exports){
 /*
  * classie
  * http://github.amexpub.com/modules/classie
@@ -2392,7 +2552,7 @@ function hasOwnProperty(obj, prop) {
 
 module.exports = require('./lib/classie');
 
-},{"./lib/classie":12}],12:[function(require,module,exports){
+},{"./lib/classie":15}],15:[function(require,module,exports){
 /*!
  * classie - class helper functions
  * from bonzo https://github.com/ded/bonzo
@@ -2475,7 +2635,7 @@ module.exports = require('./lib/classie');
   if ( typeof window === "object" && typeof window.document === "object" ) {
     window.classie = classie;
   }
-},{}],13:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -2510,4 +2670,4 @@ function extend(origin, add) {
   return origin;
 }
 
-},{}]},{},[1])
+},{}]},{},[1,2,3,4])

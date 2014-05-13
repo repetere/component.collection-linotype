@@ -66,6 +66,7 @@ module.exports = function(grunt) {
       dist: {
         files: {
           'example/build/main.js': ['client/scripts/**/*.js'],
+          'example/test/test.js': ['client/test/scripts/**/*.js'],
           // 'build/main.js': ['client/scripts/**/*.js', 'client/scripts/**/*.coffee'],
         },
         options: {
@@ -113,7 +114,7 @@ module.exports = function(grunt) {
           'client/**/*.less',
           'test/**/*.js',
         ],
-        tasks: ['lint','browserify', 'test','less'],
+        tasks: ['lint','browserify',/*'doc',*/ 'test','less'],
         options: {
           interrupt: true
         }
