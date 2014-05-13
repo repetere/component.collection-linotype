@@ -816,6 +816,8 @@ var linotype = function(config_options){
 		window.addEventListener("onorientationchange",browserOnOrientationChange, false);
 		window.addEventListener("resize",windowResizeEvent, false);
 
+		document.addEventListener("keydown",keydownEvent,false);
+
 		var navlinks = document.querySelectorAll('#fullPage-nav a');
 		for(var x =0; x<navlinks.length;x++){
 			navlinks[x].addEventListener("click",navigationClickEvent,false);
@@ -850,6 +852,40 @@ var linotype = function(config_options){
 		return 'down';
 	}
 
+	/**	
+	 * Sliding with arrow keys, both, vertical and horizontal
+	 */
+	var keydownEvent = function(e){
+		console.log("keydownEvent",isMoving);
+		if (options.keyboardScrolling && !isMoving) {
+			switch (e.which) {
+				//up
+				case 38:
+				case 33:
+					this.moveSectionUp();
+					break;
+
+				//down
+				case 40:
+				case 34:
+					this.moveSectionDown();
+					break;
+
+				//left
+				case 37:
+					this.moveSlideLeft();
+					break;
+
+				//right
+				case 39:
+					this.moveSlideRight();
+					break;
+
+				default:
+					return; // exit this handler for other keys
+			}
+		}
+	}.bind(this);
 
 	/**
 	 * Removes the auto scrolling action fired by the mouse wheel and tackpad.
