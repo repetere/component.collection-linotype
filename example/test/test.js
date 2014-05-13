@@ -1,153 +1,9 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-/*
- * detect-dom-ready
- * http://github.amexpub.com/modules/detect-dom-ready
- *
- * Copyright (c) 2013 Amex Pub. All rights reserved.
- */
-
-'use strict';
-
-module.exports = function(grunt) {
-  grunt.initConfig({
-    jsbeautifier: {
-      files: ["<%= jshint.all %>"],
-      options: {
-        "indent_size": 2,
-        "indent_char": " ",
-        "indent_level": 0,
-        "indent_with_tabs": false,
-        "preserve_newlines": true,
-        "max_preserve_newlines": 10,
-        "brace_style": "collapse",
-        "keep_array_indentation": false,
-        "keep_function_indentation": false,
-        "space_before_conditional": true,
-        "eval_code": false,
-        "indent_case": false,
-        "unescape_strings": false,
-        "space_after_anon_function": true
-      }
-    },
-    simplemocha: {
-      options: {
-        globals: ['should'],
-        timeout: 3000,
-        ignoreLeaks: false,
-        ui: 'bdd',
-        reporter: 'tap'
-      },
-      all: {
-        src: 'test/**/*.js'
-      }
-    },
-    jshint: {
-      options: {
-        jshintrc: '.jshintrc'
-      },
-      all: [
-        'Gruntfile.js',
-        'index.js',
-        'lib/**/*.js',
-        'test/**/*.js'
-      ]
-    },
-    watch: {
-      scripts: {
-        // files: '**/*.js',
-        files: [
-          'Gruntfile.js',
-          'index.js',
-          'lib/**/*.js',
-          'test/**/*.js'
-        ],
-        tasks: ['lint', 'test'],
-        options: {
-          interrupt: true
-        }
-      }
-    }
-  });
-
-  grunt.loadNpmTasks('grunt-simple-mocha');
-  grunt.loadNpmTasks('grunt-jsbeautifier');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-contrib-watch');
-
-
-  grunt.registerTask('default', ['jshint', 'simplemocha']);
-  grunt.registerTask('lint', 'jshint');
-  grunt.registerTask('test', 'simplemocha');
-};
-
-},{}],2:[function(require,module,exports){
-/*
- * detect-dom-ready
- * http://github.amexpub.com/modules/detect-dom-ready
- *
- * Copyright (c) 2013 AmexPub. All rights reserved.
- */
-
-module.exports = require('./lib/detect-dom-ready');
-
-},{"./lib/detect-dom-ready":3}],3:[function(require,module,exports){
-/*
- * detect-dom-ready
- * http://github.amexpub.com/modules
- *
- * Copyright (c) 2013 Amex Pub. All rights reserved.
- */
-
-'use strict';
-
-module.exports = function(callback){
-    // if ( this.readyBound ) {return;}
-    // this.readyBound = true;
-
-    if(document.addEventListener){
-        document.addEventListener( "DOMContentLoaded", function(){
-            //remove listener
-            callback();
-            return;
-        }, false );
-    }
-    else if(document.attachEvent){
-        document.attachEvent("onreadystatechange", function(){
-            if ( document.readyState === "complete" ) {
-                //remove listener
-                callback();
-                return;
-            }
-        });
-
-        if ( document.documentElement.doScroll && window === window.top ){
-            try{
-                // If IE is used, use the trick by Diego Perini
-                // http://javascript.nwbox.com/IEContentLoaded/
-                document.documentElement.doScroll("left");
-
-            }
-            catch( error ) {
-                callback();
-                return;
-            }
-            // and execute any waiting functions
-            callback();
-            return;
-        }
-    }
-};
-},{}],4:[function(require,module,exports){
 'use strict';
 
 // console.log("example test wepps!!s");
 
-var linotype = require('../../../index'),
-	domReady = require('detect-dom-ready');
-
-
-domReady(function(){
-}); //executes after dom has loaded
+var linotype = require('../../../index');
 
 window.onload =function(){
 	window.Linotype = new linotype({
@@ -157,6 +13,7 @@ window.onload =function(){
 		idSelector: 'fullpage',
 		navigation: true,
 		css3: true,
+		menu: '#menu',
 		scrollOverflow: true,
 		navigationPosition: 'right',
 		navigationTooltips: ['First', 'Second', 'Third']
@@ -164,7 +21,7 @@ window.onload =function(){
 
 	window.Linotype.init();
 };
-},{"../../../index":5,"detect-dom-ready":2}],5:[function(require,module,exports){
+},{"../../../index":2}],2:[function(require,module,exports){
 /*
  * linotype
  * http://github.amexpub.com/modules/linotype
@@ -174,7 +31,7 @@ window.onload =function(){
 
 module.exports = require('./lib/linotype');
 
-},{"./lib/linotype":8}],6:[function(require,module,exports){
+},{"./lib/linotype":5}],3:[function(require,module,exports){
 /*
  * linotype
  * https://github.com/typesettin/linotype
@@ -205,7 +62,7 @@ module.exports = Slimscroll;
 if ( typeof window === "object" && typeof window.document === "object" ) {
 	window.Slimscroll = Slimscroll;
 }
-},{}],7:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 /*
  * linotype
  * https://github.com/typesettin/linotype
@@ -215,7 +72,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 
 'use strict';
 
-// var classie = require('classie'),
+var classie = require('classie');
 // 	extend = require('util-extend'),
 // 	events = require('events'),
 // 	util = require('util');
@@ -227,6 +84,32 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
  */
 
 var domhelper = {
+
+	/**
+	 * toggles class across nodelist/elementcollection
+	 * @param {object} elementCollection - html dom element
+	 * @param {object} element - html dom element
+	 * @param {string} name of class
+	 * @method
+	 */
+	removeAllClassAndToggle: function(element,elementCollection,toggleClass){
+		//updating the active class
+		for(var h =0; h <elementCollection.length; h++){
+			classie.removeClass(elementCollection[h],toggleClass);
+		}
+		classie.addClass(element,toggleClass);
+	},
+	/**
+	 * converts idnex of node in nodelist
+	 * @param {object} nodelist - html dom element
+	 * @param {object} element - html dom element
+	 * @return {number} index of element in nodelist
+	 * @method
+	 */
+	nodeIndexOfNodeList: function(nodelist,element){
+		return domhelper.nodelistToArray(nodelist,true).indexOf(element.outerHTML);
+    },
+
 	/**
 	 * converts nodelists to arrays
 	 * @param {node} nl - html dom element
@@ -296,6 +179,29 @@ var domhelper = {
 		var newFirstChild = wrapper.firstChild;
 
 		newFirstChild.innerHTML=wrapper_clone.innerHTML;
+	},
+
+	/**
+	 * get scroll position of element
+	 * @method
+	 * @param {node} element - html dom element
+	 * @return {number} position of scroll
+	 */
+	getScrollTop: function(element){
+		// console.log(typeof element);
+		if(element === window && typeof window.pageYOffset!== 'undefined'){
+			//most browsers except IE before #9
+			return window.pageYOffset;
+		}
+		else if(typeof element ==="object"){
+			return element.scrollTop;
+		}
+		else {
+			var B= document.body; //IE 'quirks'
+			var D= document.documentElement; //IE with doctype
+			D= (D.clientHeight)? D: B;
+			return D.scrollTop;
+		}
 	},
 
 	/**
@@ -397,7 +303,7 @@ module.exports = domhelper;
 if ( typeof window === "object" && typeof window.document === "object" ) {
 	window.domhelper = domhelper;
 }
-},{}],8:[function(require,module,exports){
+},{"classie":11}],5:[function(require,module,exports){
 /*
  * linotype
  * https://github.com/typesettin/linotype
@@ -575,11 +481,11 @@ var linotype = function(config_options){
 	 */
 	this.setMouseWheelScrolling = function (value){
 		console.log('setMouseWheelScrolling',value);
-		// if(value){
-		// 	addMouseWheelHandler();
-		// }else{
-		// 	removeMouseWheelHandler();
-		// }
+		if(value){
+			addMouseWheelHandler();
+		}else{
+			removeMouseWheelHandler();
+		}
 	};
 
 	/**
@@ -587,15 +493,15 @@ var linotype = function(config_options){
 	 * @param {number} value
 	 */
 	this.setAllowScrolling = function (value){
-		console.log("allow scrolling: ",value);
-		// if(value){
-		// 	this.setMouseWheelScrolling(true);
-		// 	addTouchHandler();
-		// }
-		// else{
-		// 	this.setMouseWheelScrolling(false);
-		// 	removeTouchHandler();
-		// }
+		console.log("allow scrolling: !!!! ADD TOUCH HANDLER !!!",value);
+		if(value){
+			this.setMouseWheelScrolling(true);
+			// addTouchHandler();
+		}
+		else{
+			this.setMouseWheelScrolling(false);
+			// removeTouchHandler();
+		}
 	};
 
 	/**
@@ -837,7 +743,7 @@ var linotype = function(config_options){
 
 		//moving the menu outside the main container (avoid problems with fixed positions when using CSS3 tranforms)
 		if(options.menu && options.css3){
-			document.getElementsByTagName('body')[0].appendChild(options.menu);
+			document.getElementsByTagName('body')[0].appendChild(document.querySelector(options.menu));
 		}
 
 		if(options.scrollOverflow){
@@ -905,6 +811,7 @@ var linotype = function(config_options){
 	/** The current scroll delay setting */
 	this.setupEventHandlers = function(){
 		window.addEventListener("hashchange", windowOnHashChangeEvent, false);
+		window.addEventListener("scroll",windowScrollEvent, false);
 
 		var navlinks = document.querySelectorAll('#fullPage-nav a');
 		for(var x =0; x<navlinks.length;x++){
@@ -923,20 +830,110 @@ var linotype = function(config_options){
 	var insertAllAfter = domhelper.insertAllAfter;
 	var getNextElements = domhelper.getNextElements;
 	var getPreviousElements = domhelper.getPreviousElements;
-
+	var nodeIndexOfNodeList = domhelper.nodeIndexOfNodeList;
+	var getScrollTop = domhelper.getScrollTop;
+	var removeAllClassAndToggle = domhelper.removeAllClassAndToggle;
 	/**
 	 * Retuns `up` or `down` depending on the scrolling movement to reach its destination
 	 * from the current section.
 	 */
 	function getYmovement(destiny){
-		var fromIndex = nodelistToArray(document.getElementsByClassName('section'),true).indexOf(document.getElementsByClassName('section active')[0].outerHTML);//$('.section.active').index('.section');
-		var toIndex = nodelistToArray(document.getElementsByClassName('section'),true).indexOf(destiny.outerHTML);//destiny.index('.section');
+		var fromIndex = nodeIndexOfNodeList(document.getElementsByClassName('section'),document.getElementsByClassName('section active')[0]); //$('.section.active').index('.section');
+		var toIndex = nodeIndexOfNodeList(document.getElementsByClassName('section'),destiny);//destiny.index('.section');
 
 		if(fromIndex > toIndex){
 			return 'up';
 		}
 		return 'down';
 	}
+
+
+	/**
+	 * Removes the auto scrolling action fired by the mouse wheel and tackpad.
+	 * After this function is called, the mousewheel and trackpad movements won't scroll through sections.
+	 */
+	function removeMouseWheelHandler(){
+		if (document.addEventListener) {
+			document.removeEventListener('mousewheel', MouseWheelHandler, false); //IE9, Chrome, Safari, Oper
+			document.removeEventListener('wheel', MouseWheelHandler, false); //Firefox
+		} else {
+			document.detachEvent("onmousewheel", MouseWheelHandler); //IE 6/7/8
+		}
+	}
+
+
+	/**
+	 * Adds the auto scrolling action for the mouse wheel and tackpad.
+	 * After this function is called, the mousewheel and trackpad movements will scroll through sections
+	 */
+	function addMouseWheelHandler(){
+		if (document.addEventListener) {
+			document.addEventListener("mousewheel", MouseWheelHandler, false); //IE9, Chrome, Safari, Oper
+			document.addEventListener("wheel", MouseWheelHandler, false); //Firefox
+		} else {
+			document.attachEvent("onmousewheel", MouseWheelHandler); //IE 6/7/8
+		}
+	}
+
+	/**
+	 * Detecting mousewheel scrolling
+	 * 
+	 * http://blogs.sitepointstatic.com/examples/tech/mouse-wheel/index.html
+	 * http://www.sitepoint.com/html5-javascript-mouse-wheel/
+	 */
+	var MouseWheelHandler = function (e){
+		if(options.autoScrolling){
+			// cross-browser wheel delta
+			e = window.event || e;
+			var delta = Math.max(-1, Math.min(1,
+					(e.wheelDelta || -e.deltaY || -e.detail)));
+			var scrollable;
+			var activeSection = document.querySelector('.section.active');
+
+			if (!isMoving) { //if theres any #
+
+				//if there are landscape slides, we check if the scrolling bar is in the current one or not
+				if(activeSection.querySelectorAll('.slides').length){
+					console.log("has slides");
+					scrollable= activeSection.querySelector('.slide.active').querySelector('.scrollable');
+				}else{
+					console.log("on section");
+					scrollable = activeSection.querySelector('.scrollable');
+					// console.log("scrollable.length",(typeof scrollable.length));
+				}
+
+				//scrolling down?
+				if (delta < 0) {
+					if(scrollable && scrollable.length > 0 ){
+						//is the scrollbar at the end of the scroll?
+						if(isScrolled('bottom', scrollable)){
+							this.moveSectionDown();
+						}else{
+							return true; //normal scroll
+						}
+					}else{
+						this.moveSectionDown();
+					}
+				}
+
+				//scrolling up?
+				else {
+					if(scrollable && scrollable.length > 0){
+						//is the scrollbar at the start of the scroll?
+						if(isScrolled('top', scrollable)){
+							this.moveSectionUp();
+						}else{
+							return true; //normal scroll
+						}
+					}else{
+						this.moveSectionUp();
+					}
+				}
+			}
+
+			return false;
+		}
+	}.bind(this);
 
 	/** handle updating window hash location */
 	function windowOnHashChangeEvent(e){
@@ -958,19 +955,71 @@ var linotype = function(config_options){
 		}
 	}
 
+	//window scroll event
+	function windowScrollEvent(e){
+		// console.log("window scroll");
+		var allSections = document.getElementsByClassName('section');
+		if(!options.autoScrolling){
+			var currentScroll = getScrollTop(window);
+
+			var scrolledSections = [];
+
+			nodelistToArray(document.querySelectorAll('.section')).map(function(mapIndex,index,arr){
+				var $this = mapIndex;
+				if ($this.offsetTop< (currentScroll + 100)){
+					if($this){scrolledSections.push($this);}
+				}
+			});
+
+			//geting the last one, the current one on the screen
+			var currentSectionIndex = scrolledSections.length-1;
+			var currentSection = scrolledSections[currentSectionIndex];
+			// console.log("currentSection",currentSection);
+
+			//executing only once the first time we reach the section
+			if(!classie.hasClass(currentSection,'active')){
+				var leavingSection =nodeIndexOfNodeList(document.getElementsByClassName('section'),document.querySelector('.section.active')) +1;
+
+				isScrolling = true;
+
+				var yMovement = getYmovement(currentSection);
+
+				removeAllClassAndToggle(currentSection,allSections,'active');
+
+				var anchorLink  = currentSection.getAttribute('data-anchor');
+				if(typeof options.onLeave ==='function'){
+					options.onLeave.call(leavingSection, (currentSectionIndex + 1), yMovement);
+				}
+
+				activateMenuElement(anchorLink);
+				activateNavDots(anchorLink, 0);
+
+				if(options.anchors.length && !isMoving){
+					//needed to enter in hashChange event when using the menu with anchor links
+					lastScrolledDestiny = anchorLink;
+
+					location.hash = anchorLink;
+				}
+
+				//small timeout in order to avoid entering in hashChange event when scrolling is not finished yet
+				clearTimeout(scrollId);
+				scrollId = setTimeout(function(){
+					isScrolling = false;
+				}, 100);
+			}
+
+		}
+	}
+
 	//navigation action 
 	function navigationClickEvent(e){
 		e.preventDefault();
 		var atarget = e.target.parentNode.parentNode;
 		var allNavTargets = e.target.parentNode.parentNode.parentNode.children;
-		var index = nodelistToArray(allNavTargets,true).indexOf(atarget.outerHTML);
+		var index = nodeIndexOfNodeList(allNavTargets,atarget);
+
 		scrollPage(document.getElementsByClassName('section')[index]);
 	}
-	// $(document).on('click', '#fullPage-nav a', function(e){
-	// 	e.preventDefault();
-	// 	var index = $(this).parent().index();
-	// 	scrollPage($('.section').eq(index));
-	// });
 
 	function scrollToAnchor(){
 		//getting the anchor link in the URL and deleting the `#`
@@ -982,6 +1031,7 @@ var linotype = function(config_options){
 			scrollPageAndSlide(section, slide);
 		}
 	}
+
 	/**
 	 * Scrolls to the given section and slide 
 	 */
@@ -1168,7 +1218,7 @@ var linotype = function(config_options){
 		// Use CSS3 translate functionality or...
 		if (options.css3 && options.autoScrolling) {
 
-console.log("translate css3");
+			console.log("translate css3");
 
 			//callback (onLeave) if the site is not just resizing and readjusting the slides
 			if((typeof options.onLeave ==='function') && !localIsResizing ){
@@ -1194,7 +1244,7 @@ console.log("translate css3");
 		}
 		else { // ... use jQuery animate 
 
-console.log("no css3 sub jquery animate");
+			console.log("no css3 sub jquery animate");
 			//callback (onLeave) if the site is not just resizing and readjusting the slides
 			if((typeof options.onLeave ==='function') && !localIsResizing){
 				options.onLeave.call(leavingSection, (sectionIndex + 1), yMovement);
@@ -1223,14 +1273,6 @@ console.log("no css3 sub jquery animate");
 			activateMenuElement(anchorLink);
 			activateNavDots(anchorLink, sectionIndex);
 		}
-	}
-
-	function removeAllClassAndToggle(element,elementCollection,toggleClass){
-		//updating the active class
-		for(var h =0; h <elementCollection.length; h++){
-			classie.removeClass(elementCollection[h],toggleClass);
-		}
-		classie.addClass(element,toggleClass);
 	}
 
 	/**
@@ -1286,12 +1328,26 @@ console.log("no css3 sub jquery animate");
 	}
 
 	/**
+	 * Return a boolean depending on whether the scrollable element is at the end or at the start of the scrolling
+	 * depending on the given type.
+	 */
+	function isScrolled(type, scrollable){
+		if(type === 'top'){
+			return !scrollable.scrollTop();
+		}else if(type === 'bottom'){
+			return scrollable.scrollTop() + scrollable.innerHeight() >= scrollable[0].scrollHeight;
+		}
+	}
+
+	/**
 	 * Activating the website main menu elements according to the given slide name.
 	 */
 	function activateMenuElement(name){
 		if(options.menu){
-			classie.removeClass(options.menu.querySelector('.active'),'active');
-			classie.addClass(options.menu.querySelector('[data-menuanchor="'+name+'"]'),'active');
+			if(document.querySelector(options.menu).querySelector('.active')){
+				classie.removeClass(document.querySelector(options.menu).querySelector('.active'),'active');
+			}
+			classie.addClass(document.querySelector(options.menu).querySelector('[data-menuanchor="'+name+'"]'),'active');
 		}
 	}
 
@@ -1319,7 +1375,7 @@ console.log("no css3 sub jquery animate");
 		}
 		else{
 			if(options.verticalCentered){
-				contentHeight = element.getElementsByClassName('tableCell').scrollHeight;
+				contentHeight = element.getElementsByClassName('tableCell')[0].scrollHeight;
 			}
 		}
 
@@ -1328,6 +1384,8 @@ console.log("no css3 sub jquery animate");
 		sectionPaddingTop = (section.style['padding-top'])? parseInt(section.style['padding-top'],10) :0;
 		var scrollHeight = windowsHeight - sectionPaddingBottom - sectionPaddingTop;
 
+		console.log("creating scrollable divs","contentHeight > scrollHeight",(contentHeight > scrollHeight));
+		console.log("scrollHeight",scrollHeight);
 		//needs scroll?
 		if ( contentHeight > scrollHeight) {
 			//was there already an scroll ? Updating it
@@ -1605,7 +1663,7 @@ module.exports = linotype;
 if ( typeof window === "object" && typeof window.document === "object" ) {
 	window.linotype = linotype;
 }
-},{"./Slimscroll":6,"./domhelper":7,"classie":14,"events":9,"util":13,"util-extend":16}],9:[function(require,module,exports){
+},{"./Slimscroll":3,"./domhelper":4,"classie":11,"events":6,"util":10,"util-extend":13}],6:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -1907,7 +1965,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],10:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -1932,7 +1990,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],11:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -1980,11 +2038,8 @@ process.argv = [];
 function noop() {}
 
 process.on = noop;
-process.addListener = noop;
 process.once = noop;
 process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
 process.emit = noop;
 
 process.binding = function (name) {
@@ -1997,14 +2052,14 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],12:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],13:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -2593,8 +2648,8 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-}).call(this,require("FWaASH"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":12,"FWaASH":11,"inherits":10}],14:[function(require,module,exports){
+}).call(this,require("/Users/yetse/Developer/github/yawetse/linotype/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":9,"/Users/yetse/Developer/github/yawetse/linotype/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":8,"inherits":7}],11:[function(require,module,exports){
 /*
  * classie
  * http://github.amexpub.com/modules/classie
@@ -2604,7 +2659,7 @@ function hasOwnProperty(obj, prop) {
 
 module.exports = require('./lib/classie');
 
-},{"./lib/classie":15}],15:[function(require,module,exports){
+},{"./lib/classie":12}],12:[function(require,module,exports){
 /*!
  * classie - class helper functions
  * from bonzo https://github.com/ded/bonzo
@@ -2687,7 +2742,7 @@ module.exports = require('./lib/classie');
   if ( typeof window === "object" && typeof window.document === "object" ) {
     window.classie = classie;
   }
-},{}],16:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -2722,4 +2777,4 @@ function extend(origin, add) {
   return origin;
 }
 
-},{}]},{},[1,2,3,4])
+},{}]},{},[1])

@@ -66,7 +66,8 @@ module.exports = function(grunt) {
       dist: {
         files: {
           'example/build/main.js': ['client/scripts/**/*.js'],
-          'example/test/test.js': ['client/test/scripts/**/*.js'],
+          'example/test/test.js': ['client/test/scripts/test_main.js'],
+          'example/test/test-normalscroll.js': ['client/test/scripts/test_normalscroll.js'],
           // 'build/main.js': ['client/scripts/**/*.js', 'client/scripts/**/*.coffee'],
         },
         options: {

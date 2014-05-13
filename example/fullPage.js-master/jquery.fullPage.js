@@ -348,6 +348,8 @@
 				//geting the last one, the current one on the screen
 				var currentSection = scrolledSections[scrolledSections.length-1];
 				
+				console.log("currentSection",currentSection);
+
 				//executing only once the first time we reach the section
 				if(!currentSection.hasClass('active')){
 					var leavingSection = $('.section.active').index('.section') + 1;
@@ -528,7 +530,9 @@
 					if(activeSection.find('.slides').length){
 						scrollable= activeSection.find('.slide.active').find('.scrollable');
 					}else{
+						console.log("on section");
 						scrollable = activeSection.find('.scrollable');
+						console.log(scrollable);
 					}
 				
 					//scrolling down?
@@ -822,7 +826,6 @@
 					scrollPageAndSlide(section, slide);
 				}
 			}
-			
 		});
 
 
@@ -1146,9 +1149,9 @@
 		}
 		
 		/**
-		* Return a boolean depending on whether the scrollable element is at the end or at the start of the scrolling
-		* depending on the given type.
-		*/
+		 * Return a boolean depending on whether the scrollable element is at the end or at the start of the scrolling
+		 * depending on the given type.
+		 */
 		function isScrolled(type, scrollable){
 			if(type === 'top'){
 				return !scrollable.scrollTop();
@@ -1158,9 +1161,9 @@
 		}
 		
 		/**
-		* Retuns `up` or `down` depending on the scrolling movement to reach its destination
-		* from the current section.
-		*/
+		 * Retuns `up` or `down` depending on the scrolling movement to reach its destination
+		 * from the current section.
+		 */
 		function getYmovement(destiny){
 			var fromIndex = $('.section.active').index('.section');
 			var toIndex = destiny.index('.section');
@@ -1172,9 +1175,9 @@
 		}	
 
 		/**
-		* Retuns `right` or `left` depending on the scrolling movement to reach its destination
-		* from the current slide.
-		*/
+		 * Retuns `right` or `left` depending on the scrolling movement to reach its destination
+		 * from the current slide.
+		 */
 		function getXmovement(fromIndex, toIndex){
 			if( fromIndex == toIndex){
 				return 'none'

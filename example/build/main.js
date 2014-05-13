@@ -55,7 +55,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 
 'use strict';
 
-// var classie = require('classie'),
+var classie = require('classie');
 // 	extend = require('util-extend'),
 // 	events = require('events'),
 // 	util = require('util');
@@ -67,6 +67,32 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
  */
 
 var domhelper = {
+
+	/**
+	 * toggles class across nodelist/elementcollection
+	 * @param {object} elementCollection - html dom element
+	 * @param {object} element - html dom element
+	 * @param {string} name of class
+	 * @method
+	 */
+	removeAllClassAndToggle: function(element,elementCollection,toggleClass){
+		//updating the active class
+		for(var h =0; h <elementCollection.length; h++){
+			classie.removeClass(elementCollection[h],toggleClass);
+		}
+		classie.addClass(element,toggleClass);
+	},
+	/**
+	 * converts idnex of node in nodelist
+	 * @param {object} nodelist - html dom element
+	 * @param {object} element - html dom element
+	 * @return {number} index of element in nodelist
+	 * @method
+	 */
+	nodeIndexOfNodeList: function(nodelist,element){
+		return domhelper.nodelistToArray(nodelist,true).indexOf(element.outerHTML);
+    },
+
 	/**
 	 * converts nodelists to arrays
 	 * @param {node} nl - html dom element
@@ -136,6 +162,29 @@ var domhelper = {
 		var newFirstChild = wrapper.firstChild;
 
 		newFirstChild.innerHTML=wrapper_clone.innerHTML;
+	},
+
+	/**
+	 * get scroll position of element
+	 * @method
+	 * @param {node} element - html dom element
+	 * @return {number} position of scroll
+	 */
+	getScrollTop: function(element){
+		// console.log(typeof element);
+		if(element === window && typeof window.pageYOffset!== 'undefined'){
+			//most browsers except IE before #9
+			return window.pageYOffset;
+		}
+		else if(typeof element ==="object"){
+			return element.scrollTop;
+		}
+		else {
+			var B= document.body; //IE 'quirks'
+			var D= document.documentElement; //IE with doctype
+			D= (D.clientHeight)? D: B;
+			return D.scrollTop;
+		}
 	},
 
 	/**
@@ -237,7 +286,7 @@ module.exports = domhelper;
 if ( typeof window === "object" && typeof window.document === "object" ) {
 	window.domhelper = domhelper;
 }
-},{}],5:[function(require,module,exports){
+},{"classie":11}],5:[function(require,module,exports){
 /*
  * linotype
  * https://github.com/typesettin/linotype
@@ -415,11 +464,11 @@ var linotype = function(config_options){
 	 */
 	this.setMouseWheelScrolling = function (value){
 		console.log('setMouseWheelScrolling',value);
-		// if(value){
-		// 	addMouseWheelHandler();
-		// }else{
-		// 	removeMouseWheelHandler();
-		// }
+		if(value){
+			addMouseWheelHandler();
+		}else{
+			removeMouseWheelHandler();
+		}
 	};
 
 	/**
@@ -427,15 +476,15 @@ var linotype = function(config_options){
 	 * @param {number} value
 	 */
 	this.setAllowScrolling = function (value){
-		console.log("allow scrolling: ",value);
-		// if(value){
-		// 	this.setMouseWheelScrolling(true);
-		// 	addTouchHandler();
-		// }
-		// else{
-		// 	this.setMouseWheelScrolling(false);
-		// 	removeTouchHandler();
-		// }
+		console.log("allow scrolling: !!!! ADD TOUCH HANDLER !!!",value);
+		if(value){
+			this.setMouseWheelScrolling(true);
+			// addTouchHandler();
+		}
+		else{
+			this.setMouseWheelScrolling(false);
+			// removeTouchHandler();
+		}
 	};
 
 	/**
@@ -677,7 +726,7 @@ var linotype = function(config_options){
 
 		//moving the menu outside the main container (avoid problems with fixed positions when using CSS3 tranforms)
 		if(options.menu && options.css3){
-			document.getElementsByTagName('body')[0].appendChild(options.menu);
+			document.getElementsByTagName('body')[0].appendChild(document.querySelector(options.menu));
 		}
 
 		if(options.scrollOverflow){
@@ -745,6 +794,7 @@ var linotype = function(config_options){
 	/** The current scroll delay setting */
 	this.setupEventHandlers = function(){
 		window.addEventListener("hashchange", windowOnHashChangeEvent, false);
+		window.addEventListener("scroll",windowScrollEvent, false);
 
 		var navlinks = document.querySelectorAll('#fullPage-nav a');
 		for(var x =0; x<navlinks.length;x++){
@@ -763,20 +813,110 @@ var linotype = function(config_options){
 	var insertAllAfter = domhelper.insertAllAfter;
 	var getNextElements = domhelper.getNextElements;
 	var getPreviousElements = domhelper.getPreviousElements;
-
+	var nodeIndexOfNodeList = domhelper.nodeIndexOfNodeList;
+	var getScrollTop = domhelper.getScrollTop;
+	var removeAllClassAndToggle = domhelper.removeAllClassAndToggle;
 	/**
 	 * Retuns `up` or `down` depending on the scrolling movement to reach its destination
 	 * from the current section.
 	 */
 	function getYmovement(destiny){
-		var fromIndex = nodelistToArray(document.getElementsByClassName('section'),true).indexOf(document.getElementsByClassName('section active')[0].outerHTML);//$('.section.active').index('.section');
-		var toIndex = nodelistToArray(document.getElementsByClassName('section'),true).indexOf(destiny.outerHTML);//destiny.index('.section');
+		var fromIndex = nodeIndexOfNodeList(document.getElementsByClassName('section'),document.getElementsByClassName('section active')[0]); //$('.section.active').index('.section');
+		var toIndex = nodeIndexOfNodeList(document.getElementsByClassName('section'),destiny);//destiny.index('.section');
 
 		if(fromIndex > toIndex){
 			return 'up';
 		}
 		return 'down';
 	}
+
+
+	/**
+	 * Removes the auto scrolling action fired by the mouse wheel and tackpad.
+	 * After this function is called, the mousewheel and trackpad movements won't scroll through sections.
+	 */
+	function removeMouseWheelHandler(){
+		if (document.addEventListener) {
+			document.removeEventListener('mousewheel', MouseWheelHandler, false); //IE9, Chrome, Safari, Oper
+			document.removeEventListener('wheel', MouseWheelHandler, false); //Firefox
+		} else {
+			document.detachEvent("onmousewheel", MouseWheelHandler); //IE 6/7/8
+		}
+	}
+
+
+	/**
+	 * Adds the auto scrolling action for the mouse wheel and tackpad.
+	 * After this function is called, the mousewheel and trackpad movements will scroll through sections
+	 */
+	function addMouseWheelHandler(){
+		if (document.addEventListener) {
+			document.addEventListener("mousewheel", MouseWheelHandler, false); //IE9, Chrome, Safari, Oper
+			document.addEventListener("wheel", MouseWheelHandler, false); //Firefox
+		} else {
+			document.attachEvent("onmousewheel", MouseWheelHandler); //IE 6/7/8
+		}
+	}
+
+	/**
+	 * Detecting mousewheel scrolling
+	 * 
+	 * http://blogs.sitepointstatic.com/examples/tech/mouse-wheel/index.html
+	 * http://www.sitepoint.com/html5-javascript-mouse-wheel/
+	 */
+	var MouseWheelHandler = function (e){
+		if(options.autoScrolling){
+			// cross-browser wheel delta
+			e = window.event || e;
+			var delta = Math.max(-1, Math.min(1,
+					(e.wheelDelta || -e.deltaY || -e.detail)));
+			var scrollable;
+			var activeSection = document.querySelector('.section.active');
+
+			if (!isMoving) { //if theres any #
+
+				//if there are landscape slides, we check if the scrolling bar is in the current one or not
+				if(activeSection.querySelectorAll('.slides').length){
+					console.log("has slides");
+					scrollable= activeSection.querySelector('.slide.active').querySelector('.scrollable');
+				}else{
+					console.log("on section");
+					scrollable = activeSection.querySelector('.scrollable');
+					// console.log("scrollable.length",(typeof scrollable.length));
+				}
+
+				//scrolling down?
+				if (delta < 0) {
+					if(scrollable && scrollable.length > 0 ){
+						//is the scrollbar at the end of the scroll?
+						if(isScrolled('bottom', scrollable)){
+							this.moveSectionDown();
+						}else{
+							return true; //normal scroll
+						}
+					}else{
+						this.moveSectionDown();
+					}
+				}
+
+				//scrolling up?
+				else {
+					if(scrollable && scrollable.length > 0){
+						//is the scrollbar at the start of the scroll?
+						if(isScrolled('top', scrollable)){
+							this.moveSectionUp();
+						}else{
+							return true; //normal scroll
+						}
+					}else{
+						this.moveSectionUp();
+					}
+				}
+			}
+
+			return false;
+		}
+	}.bind(this);
 
 	/** handle updating window hash location */
 	function windowOnHashChangeEvent(e){
@@ -798,19 +938,71 @@ var linotype = function(config_options){
 		}
 	}
 
+	//window scroll event
+	function windowScrollEvent(e){
+		// console.log("window scroll");
+		var allSections = document.getElementsByClassName('section');
+		if(!options.autoScrolling){
+			var currentScroll = getScrollTop(window);
+
+			var scrolledSections = [];
+
+			nodelistToArray(document.querySelectorAll('.section')).map(function(mapIndex,index,arr){
+				var $this = mapIndex;
+				if ($this.offsetTop< (currentScroll + 100)){
+					if($this){scrolledSections.push($this);}
+				}
+			});
+
+			//geting the last one, the current one on the screen
+			var currentSectionIndex = scrolledSections.length-1;
+			var currentSection = scrolledSections[currentSectionIndex];
+			// console.log("currentSection",currentSection);
+
+			//executing only once the first time we reach the section
+			if(!classie.hasClass(currentSection,'active')){
+				var leavingSection =nodeIndexOfNodeList(document.getElementsByClassName('section'),document.querySelector('.section.active')) +1;
+
+				isScrolling = true;
+
+				var yMovement = getYmovement(currentSection);
+
+				removeAllClassAndToggle(currentSection,allSections,'active');
+
+				var anchorLink  = currentSection.getAttribute('data-anchor');
+				if(typeof options.onLeave ==='function'){
+					options.onLeave.call(leavingSection, (currentSectionIndex + 1), yMovement);
+				}
+
+				activateMenuElement(anchorLink);
+				activateNavDots(anchorLink, 0);
+
+				if(options.anchors.length && !isMoving){
+					//needed to enter in hashChange event when using the menu with anchor links
+					lastScrolledDestiny = anchorLink;
+
+					location.hash = anchorLink;
+				}
+
+				//small timeout in order to avoid entering in hashChange event when scrolling is not finished yet
+				clearTimeout(scrollId);
+				scrollId = setTimeout(function(){
+					isScrolling = false;
+				}, 100);
+			}
+
+		}
+	}
+
 	//navigation action 
 	function navigationClickEvent(e){
 		e.preventDefault();
 		var atarget = e.target.parentNode.parentNode;
 		var allNavTargets = e.target.parentNode.parentNode.parentNode.children;
-		var index = nodelistToArray(allNavTargets,true).indexOf(atarget.outerHTML);
+		var index = nodeIndexOfNodeList(allNavTargets,atarget);
+
 		scrollPage(document.getElementsByClassName('section')[index]);
 	}
-	// $(document).on('click', '#fullPage-nav a', function(e){
-	// 	e.preventDefault();
-	// 	var index = $(this).parent().index();
-	// 	scrollPage($('.section').eq(index));
-	// });
 
 	function scrollToAnchor(){
 		//getting the anchor link in the URL and deleting the `#`
@@ -822,6 +1014,7 @@ var linotype = function(config_options){
 			scrollPageAndSlide(section, slide);
 		}
 	}
+
 	/**
 	 * Scrolls to the given section and slide 
 	 */
@@ -1008,7 +1201,7 @@ var linotype = function(config_options){
 		// Use CSS3 translate functionality or...
 		if (options.css3 && options.autoScrolling) {
 
-console.log("translate css3");
+			console.log("translate css3");
 
 			//callback (onLeave) if the site is not just resizing and readjusting the slides
 			if((typeof options.onLeave ==='function') && !localIsResizing ){
@@ -1034,7 +1227,7 @@ console.log("translate css3");
 		}
 		else { // ... use jQuery animate 
 
-console.log("no css3 sub jquery animate");
+			console.log("no css3 sub jquery animate");
 			//callback (onLeave) if the site is not just resizing and readjusting the slides
 			if((typeof options.onLeave ==='function') && !localIsResizing){
 				options.onLeave.call(leavingSection, (sectionIndex + 1), yMovement);
@@ -1063,14 +1256,6 @@ console.log("no css3 sub jquery animate");
 			activateMenuElement(anchorLink);
 			activateNavDots(anchorLink, sectionIndex);
 		}
-	}
-
-	function removeAllClassAndToggle(element,elementCollection,toggleClass){
-		//updating the active class
-		for(var h =0; h <elementCollection.length; h++){
-			classie.removeClass(elementCollection[h],toggleClass);
-		}
-		classie.addClass(element,toggleClass);
 	}
 
 	/**
@@ -1126,12 +1311,26 @@ console.log("no css3 sub jquery animate");
 	}
 
 	/**
+	 * Return a boolean depending on whether the scrollable element is at the end or at the start of the scrolling
+	 * depending on the given type.
+	 */
+	function isScrolled(type, scrollable){
+		if(type === 'top'){
+			return !scrollable.scrollTop();
+		}else if(type === 'bottom'){
+			return scrollable.scrollTop() + scrollable.innerHeight() >= scrollable[0].scrollHeight;
+		}
+	}
+
+	/**
 	 * Activating the website main menu elements according to the given slide name.
 	 */
 	function activateMenuElement(name){
 		if(options.menu){
-			classie.removeClass(options.menu.querySelector('.active'),'active');
-			classie.addClass(options.menu.querySelector('[data-menuanchor="'+name+'"]'),'active');
+			if(document.querySelector(options.menu).querySelector('.active')){
+				classie.removeClass(document.querySelector(options.menu).querySelector('.active'),'active');
+			}
+			classie.addClass(document.querySelector(options.menu).querySelector('[data-menuanchor="'+name+'"]'),'active');
 		}
 	}
 
@@ -1159,7 +1358,7 @@ console.log("no css3 sub jquery animate");
 		}
 		else{
 			if(options.verticalCentered){
-				contentHeight = element.getElementsByClassName('tableCell').scrollHeight;
+				contentHeight = element.getElementsByClassName('tableCell')[0].scrollHeight;
 			}
 		}
 
@@ -1168,6 +1367,8 @@ console.log("no css3 sub jquery animate");
 		sectionPaddingTop = (section.style['padding-top'])? parseInt(section.style['padding-top'],10) :0;
 		var scrollHeight = windowsHeight - sectionPaddingBottom - sectionPaddingTop;
 
+		console.log("creating scrollable divs","contentHeight > scrollHeight",(contentHeight > scrollHeight));
+		console.log("scrollHeight",scrollHeight);
 		//needs scroll?
 		if ( contentHeight > scrollHeight) {
 			//was there already an scroll ? Updating it
@@ -1820,11 +2021,8 @@ process.argv = [];
 function noop() {}
 
 process.on = noop;
-process.addListener = noop;
 process.once = noop;
 process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
 process.emit = noop;
 
 process.binding = function (name) {
@@ -2433,8 +2631,8 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-}).call(this,require("FWaASH"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":9,"FWaASH":8,"inherits":7}],11:[function(require,module,exports){
+}).call(this,require("/Users/yetse/Developer/github/yawetse/linotype/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":9,"/Users/yetse/Developer/github/yawetse/linotype/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":8,"inherits":7}],11:[function(require,module,exports){
 /*
  * classie
  * http://github.amexpub.com/modules/classie
