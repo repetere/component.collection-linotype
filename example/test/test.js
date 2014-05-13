@@ -1026,7 +1026,6 @@ var linotype = function(config_options){
 
 	//window resize event
 	function windowResizeEvent(e){
-		console.log("windowResizeEvent");
 		clearTimeout(resizeTimeout);
 		resizeTimeout = setTimeout(doneResizing, 500);
 	}
@@ -1034,8 +1033,9 @@ var linotype = function(config_options){
 	//mobile orientation change
 	function browserOnOrientationChange(e){
 		console.log("browserOnOrientationChange");
-		// doneResizing();
+		doneResizing();
 	}
+
 	/**
 	 * When resizing is finished, we adjust the slides sizes and positions
 	 */
@@ -1138,7 +1138,6 @@ var linotype = function(config_options){
 			document.getElementsByTagName("body")[0].style["font-size"] = '100%';
 		}
 	}
-
 
 	function scrollToAnchor(){
 		//getting the anchor link in the URL and deleting the `#`
