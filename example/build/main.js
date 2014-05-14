@@ -335,10 +335,11 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 }
 },{"classie":11}],5:[function(require,module,exports){
 /**
- * linotype
- * https://github.com/typesettin/linotype
- * @author yaw joseph etse
- * Copyright (c) 2014 Typesettin. All rights reserved.
+ * @title linotype
+ * @{@link https://github.com/typesettin/linotype}
+ * @author Yaw Joseph Etse
+ * @copyright Copyright (c) 2014 Typesettin. All rights reserved.
+ * @license MIT
  */
 
 'use strict';
@@ -352,7 +353,10 @@ var classie = require('classie'),
 
 /**
  * A module that represents a linotype object, a linotyper is a page composition tool.
- * @author yaw joseph etse
+ * @{@link https://github.com/typesettin/linotype}
+ * @author Yaw Joseph Etse
+ * @copyright Copyright (c) 2014 Typesettin. All rights reserved.
+ * @license MIT
  * @module linotype
  * @requires module:classie
  * @requires module:util-extent
@@ -362,10 +366,6 @@ var classie = require('classie'),
  * @todo need @linotype~checkParentForNormalScrollElement to fix parent.isEqualNode to loop through selector of normalscrollelements called from @linotype~touchMoveHandler
  * @throws {ConfigurationError} If conflicting scrolling options are set  
  */
-
-/* jshint debug: true */
-// debugger;
-
 var linotype = function(config_options){
 	/** module default configuration */
 	var options,
@@ -1636,6 +1636,7 @@ var linotype = function(config_options){
 				options.onLeave.call(leavingSection, (sectionIndex + 1), yMovement);
 			}
 
+			classie.addClass( container, 'easing' );
 			var translate3d = 'translate3d(0px, -' + dtop + 'px, 0px)';
 			transformContainer(translate3d, true);
 
@@ -2061,7 +2062,6 @@ var linotype = function(config_options){
 	function transformContainer(translate3d, animated){
 		// container.toggleClass('easing', animated);
 		var transformsObject = getTransforms(translate3d);
-		classie.toggle( container, 'easing' );
 
 		// container.css(getTransforms(translate3d));
 		for(var x in transformsObject){
@@ -2482,11 +2482,8 @@ process.argv = [];
 function noop() {}
 
 process.on = noop;
-process.addListener = noop;
 process.once = noop;
 process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
 process.emit = noop;
 
 process.binding = function (name) {
@@ -3095,8 +3092,8 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-}).call(this,require("FWaASH"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":9,"FWaASH":8,"inherits":7}],11:[function(require,module,exports){
+}).call(this,require("/Users/yetse/Developer/github/yawetse/linotype/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":9,"/Users/yetse/Developer/github/yawetse/linotype/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":8,"inherits":7}],11:[function(require,module,exports){
 /*
  * classie
  * http://github.amexpub.com/modules/classie
