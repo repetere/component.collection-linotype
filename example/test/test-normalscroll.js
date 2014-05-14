@@ -212,6 +212,42 @@ var domhelper = {
 	},
 
 	/**
+	 * get scroll position of element
+	 * @method
+	 * @param {node} element - html dom element
+	 * @return {object} position element
+	 */
+	getPosition: function(element) {
+		var xPosition = 0;
+		var yPosition = 0;
+
+		while(element) {
+			xPosition += (element.offsetLeft - element.scrollLeft + element.clientLeft);
+			yPosition += (element.offsetTop - element.scrollTop + element.clientTop);
+			element = element.offsetParent;
+		}
+		return { x: xPosition, y: yPosition, left: xPosition, top: yPosition };
+	},
+
+	/**
+	 * get element selector
+	 * @method
+	 * @param {node} element - html dom element
+	 * @return {string} query selector string
+	 */
+	getElementSelector: function(element){
+		var tagSelector = (element.tagName) ? element.tagName:'',
+			idSelector = (element.id) ? '#'+element.id+'':'',
+			classSelector='';
+		if(element.classList){
+			for(var x=0; x < element.classList.length; x++){
+				classSelector+='.'+element.classList[x]+"";
+			}
+		}
+		return tagSelector+idSelector+classSelector;
+	},
+
+	/**
 	 * get parent element
 	 * @method
 	 * @param {node} element - html dom element
@@ -444,7 +480,7 @@ var linotype = function(config_options){
 		var element = document.getElementsByClassName('section active')[0],
 			docElemHTML = document.getElementsByTagName("html")[0],
 			docElemBody = document.getElementsByTagName("body")[0],
-			elementPosition = element.getBoundingClientRect();
+			elementPosition = getPosition(element);
 
 		if(options.autoScrolling){
 			docElemHTML.style.overflow = 'hidden';
@@ -799,7 +835,7 @@ var linotype = function(config_options){
 			var section = document.querySelector('[data-anchor="'+destiny+'"]');
 
 			if(!options.animateAnchor && section.length){
-				silentScroll(section.getBoundingClientRect().top);
+				silentScroll( getPosition(section).top);
 				if(typeof options.afterLoad === "function"){
 					options.afterLoad.call( this, destiny, (nodelistToArray(document.getElementsByClassName('section'),true).indexOf(section.outerHTML) + 1));
 				}
@@ -872,6 +908,8 @@ var linotype = function(config_options){
 	var nodeIndexOfNodeList = domhelper.nodeIndexOfNodeList;
 	var getScrollTop = domhelper.getScrollTop;
 	var removeAllClassAndToggle = domhelper.removeAllClassAndToggle;
+	var getElementSelector = domhelper.getElementSelector;
+	var getPosition = domhelper.getPosition;
 
 	function touchStartHandler(e){
 		var touchEvents = getEventsPage(e);
@@ -1283,7 +1321,7 @@ var linotype = function(config_options){
 
 		//adjusting the position for the current section
 		var activeSection = document.querySelector('.section.active');
-		var destinyPos = activeSection.getBoundingClientRect();
+		var destinyPos = getPosition(activeSection);
 
 		//isn't it the first section?
 		if(nodeIndexOfNodeList(allSections,activeSection)){
@@ -1434,12 +1472,14 @@ var linotype = function(config_options){
 	}
 
 	function scrollPage(element, callback, isMovementUp){
+		/* jshint debug: true */
+		// debugger;
 		// console.log("element",element);
 		var scrollOptions = {}, scrolledElement,
-			dest = element.getBoundingClientRect();
-		// console.log("dest.top",dest);
+			dest = getPosition(element);
 
 		if(typeof dest === "undefined"){ return; } //there's no element to scroll, leaving the function
+		/** @todo  TODO: why does dest.bottom === jquery.position().top */
 		var dtop = dest.top,
 			yMovement = getYmovement(element),
 			anchorLink  = element.getAttribute('data-anchor'),
@@ -1454,7 +1494,7 @@ var linotype = function(config_options){
 
 
 
-		if(activeSlide !== null && activeSlide.length){
+		if(activeSlide !== null){
 			slideAnchorLink = activeSlide.getAttribute('data-anchor');
 			slideIndex = nodelistToArray(element.getElementsByClassName('slide'),true).indexOf(activeSlide.outerHTML);//activeSlide.index();
 		}
@@ -1480,13 +1520,13 @@ var linotype = function(config_options){
 			}
 
 			// Maintain the displayed position (now that we changed the element order)
-			silentScroll(activeSection.getBoundingClientRect().top);
+			silentScroll(getPosition(activeSection).top);
 
 			// save for later the elements that still need to be reordered
 			var wrapAroundElements = activeSection;
 
 			// Recalculate animation variables
-			dest = element.getBoundingClientRect();
+			dest = getPosition(element);
 			dtop = dest.top;
 			yMovement = getYmovement(element);
 		}
@@ -1504,7 +1544,7 @@ var linotype = function(config_options){
 
 		if(options.autoScrolling){
 			scrollOptions.top = -dtop;
-			scrolledElement = container.selector;
+			scrolledElement = getElementSelector(container);
 		}else{
 			scrollOptions.scrollTop = dtop;
 			scrolledElement = 'html, body';
@@ -1527,7 +1567,7 @@ var linotype = function(config_options){
 				// $('.section:last').after(wrapAroundElements);
 			}
 
-			silentScroll(activeSection.getBoundingClientRect().top); // silentScroll($('.section.active').position().top);
+			silentScroll(getPosition(activeSection).top);
 		};
 
 		console.log("dtop",dtop);

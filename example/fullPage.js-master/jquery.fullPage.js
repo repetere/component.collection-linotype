@@ -654,6 +654,7 @@
 		}
 
 		function scrollPage(element, callback, isMovementUp){
+			debugger;
 			var scrollOptions = {}, scrolledElement;
 			var dest = element.position();
 			if(typeof dest === "undefined"){ return; } //there's no element to scroll, leaving the function
