@@ -527,9 +527,9 @@
 					if(activeSection.find('.slides').length){
 						scrollable= activeSection.find('.slide.active').find('.scrollable');
 					}else{
-						console.log("on section");
+						// console.log("on section");
 						scrollable = activeSection.find('.scrollable');
-						console.log(scrollable);
+						// console.log(scrollable);
 					}
 				
 					//scrolling down?

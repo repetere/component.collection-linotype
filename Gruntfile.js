@@ -68,6 +68,8 @@ module.exports = function(grunt) {
           'example/build/main.js': ['client/scripts/**/*.js'],
           'example/test/test.js': ['client/test/scripts/test_main.js'],
           'example/test/test-normalscroll.js': ['client/test/scripts/test_normalscroll.js'],
+          'example/test/test-backgrounds.js': ['client/test/scripts/test_backgrounds.js'],
+          'example/test/test-video.js': ['client/test/scripts/test_video.js'],
           // 'build/main.js': ['client/scripts/**/*.js', 'client/scripts/**/*.coffee'],
         },
         options: {
