@@ -892,6 +892,8 @@ var linotype = function(config_options){
 		for(var x =0; x<navlinks.length;x++){
 			navlinks[x].addEventListener("click",navigationClickEvent,false);
 		}
+
+		document.querySelector('.fullPage-slidesNav').addEventListener('click',slideNavClickEvent,false);
 	};
 
 	/**
@@ -1295,6 +1297,24 @@ var linotype = function(config_options){
 		var index = nodeIndexOfNodeList(allNavTargets,atarget);
 
 		scrollPage(document.getElementsByClassName('section')[index]);
+	}
+
+	//slidenav click event
+	function slideNavClickEvent(e){
+		e.preventDefault();
+		var etarget = e.target;
+
+		if(etarget.tagName==='SPAN'){
+			var slides = document.querySelector('.section.active').querySelectorAll('.slide'),
+			destiny;
+			var slideLI = etarget.parentNode.parentNode;
+			var allSlidesLI = etarget.parentNode.parentNode.parentNode.children;
+			classie.addClass(slideLI,'clickedTarget');
+			destiny = slides[nodeIndexOfNodeList(allSlidesLI,slideLI)];
+			classie.removeClass(slideLI,'clickedTarget');
+
+			landscapeScroll(slides,destiny);
+		}
 	}
 
 	//click events
