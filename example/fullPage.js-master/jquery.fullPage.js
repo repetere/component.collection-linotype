@@ -394,12 +394,11 @@
 		var touchEndY = 0;
 		var touchEndX = 0;
 	
-		/* Detecting touch events 
-		
-		* As we are changing the top property of the page on scrolling, we can not use the traditional way to detect it.
-		* This way, the touchstart and the touch moves shows an small difference between them which is the
-		* used one to determine the direction.
-		*/		
+		/* Detecting touch events
+		 * As we are changing the top property of the page on scrolling, we can not use the traditional way to detect it.
+		 * This way, the touchstart and the touch moves shows an small difference between them which is the
+		 * used one to determine the direction.
+		 */		
 		function touchMoveHandler(event){
 			var e = event.originalEvent;
 
@@ -506,8 +505,6 @@
 			touchStartY = touchEvents['y'];
 			touchStartX = touchEvents['x'];
 		}
-		
-
 
 		/**
 		 * Detecting mousewheel scrolling
@@ -567,7 +564,6 @@
 				return false;
 			}
 		}
-
 		
 		$.fn.fullpage.moveSectionUp = function(){
 			var prev = $('.section.active').prev('.section');
@@ -1264,8 +1260,8 @@
 		}
 		
 		/**
-		* Adds a css3 transform property to the container class with or without animation depending on the animated param.
-		*/
+		 * Adds a css3 transform property to the container class with or without animation depending on the animated param.
+		 */
 		function transformContainer(translate3d, animated){
 			container.toggleClass('easing', animated);
 			
@@ -1274,8 +1270,8 @@
 		
 		
 		/**
-		* Scrolls to the given section and slide 
-		*/
+		 * Scrolls to the given section and slide 
+		 */
 		function scrollPageAndSlide(destiny, slide){
 			if (typeof slide === 'undefined') {
 			    slide = 0;
@@ -1302,8 +1298,8 @@
 		}
 		
 		/**
-		* Scrolls the slider to the given slide destination for the given section
-		*/
+		 * Scrolls the slider to the given slide destination for the given section
+		 */
 		function scrollSlider(section, slide){
 			if(typeof slide != 'undefined'){
 				var slides = section.find('.slides');
@@ -1320,8 +1316,8 @@
 		}
 		
 		/**
-		* Creates a landscape navigation bar with dots for horizontal sliders.
-		*/
+		 * Creates a landscape navigation bar with dots for horizontal sliders.
+		 */
 		function addSlidesNavigation(section, numSlides){						
 			section.append('<div class="fullPage-slidesNav"><ul></ul></div>');
 			var nav = section.find('.fullPage-slidesNav');
@@ -1341,8 +1337,8 @@
 		
 
 		/**
-		* Sets the URL hash for a section with slides
-		*/
+		 * Sets the URL hash for a section with slides
+		 */
 		function setURLHash(slideIndex, slideAnchor, anchorLink){
 			var sectionHash = '';
 
@@ -1376,8 +1372,8 @@
 		}
 
 		/**
-		* Scrolls the slider to the given slide destination for the given section
-		*/
+		 * Scrolls the slider to the given slide destination for the given section
+		 */
 		$(document).on('click', '.fullPage-slidesNav a', function(e){
 			e.preventDefault();
 			var slides = $(this).closest('.section').find('.slides');		
@@ -1388,10 +1384,10 @@
 		
 		
 		/**
-		* Checks for translate3d support 
-		* @return boolean
-		* http://stackoverflow.com/questions/5661671/detecting-transform-translate3d-support
-		*/
+		 * Checks for translate3d support 
+		 * @return boolean
+		 * http://stackoverflow.com/questions/5661671/detecting-transform-translate3d-support
+		 */
 		function support3d() {
 			var el = document.createElement('p'), 
 				has3d,
@@ -1421,9 +1417,9 @@
 
 
 		/**
-		* Removes the auto scrolling action fired by the mouse wheel and tackpad.
-		* After this function is called, the mousewheel and trackpad movements won't scroll through sections.
-		*/
+		 * Removes the auto scrolling action fired by the mouse wheel and tackpad.
+		 * After this function is called, the mousewheel and trackpad movements won't scroll through sections.
+		 */
 		function removeMouseWheelHandler(){
 			if (document.addEventListener) {
 				document.removeEventListener('mousewheel', MouseWheelHandler, false); //IE9, Chrome, Safari, Oper
@@ -1435,9 +1431,9 @@
 
 
 		/**
-		* Adds the auto scrolling action for the mouse wheel and tackpad.
-		* After this function is called, the mousewheel and trackpad movements will scroll through sections
-		*/
+		 * Adds the auto scrolling action for the mouse wheel and tackpad.
+		 * After this function is called, the mousewheel and trackpad movements will scroll through sections
+		 */
 		function addMouseWheelHandler(){
 			if (document.addEventListener) {
 				document.addEventListener("mousewheel", MouseWheelHandler, false); //IE9, Chrome, Safari, Oper
@@ -1449,8 +1445,8 @@
 		
 		
 		/**
-		* Adds the possibility to auto scroll through sections on touch devices.
-		*/
+		 * Adds the possibility to auto scroll through sections on touch devices.
+		 */
 		function addTouchHandler(){
 			if(isTablet){
 				$(document).off('touchstart MSPointerDown').on('touchstart MSPointerDown', touchStartHandler);
@@ -1459,8 +1455,8 @@
 		}
 		
 		/**
-		* Removes the auto scrolling for touch devices.
-		*/
+		 * Removes the auto scrolling for touch devices.
+		 */
 		function removeTouchHandler(){
 			if(isTablet){
 				$(document).off('touchstart MSPointerDown');

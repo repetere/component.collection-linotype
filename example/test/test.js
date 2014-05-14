@@ -304,7 +304,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 	window.domhelper = domhelper;
 }
 },{"classie":11}],5:[function(require,module,exports){
-/*
+/**
  * linotype
  * https://github.com/typesettin/linotype
  * @author yaw joseph etse
@@ -328,7 +328,7 @@ var classie = require('classie'),
  * @requires module:util-extent
  * @requires module:util
  * @requires module:events
- * @property {object} defaults - the default module configuration
+ * @todo need @linotype~checkParentForNormalScrollElement to fix parent.isEqualNode to loop through selector of normalscrollelements called from @linotype~touchMoveHandler
  */
 
 var linotype = function(config_options){
@@ -390,7 +390,11 @@ var linotype = function(config_options){
 		lastScrolledDestiny,
 		lastScrolledSlide,
 		scrollId,
-		isScrolling = false;
+		isScrolling = false,
+		touchStartY = 0,
+		touchStartX = 0,
+		touchEndY = 0,
+		touchEndX = 0;
 
 	//extend default options
 	options = extend( defaults,config_options );
@@ -494,14 +498,13 @@ var linotype = function(config_options){
 	 * @param {number} value
 	 */
 	this.setAllowScrolling = function (value){
-		console.log("allow scrolling: !!!! ADD TOUCH HANDLER !!!",value);
 		if(value){
 			this.setMouseWheelScrolling(true);
-			// addTouchHandler();
+			addTouchHandler();
 		}
 		else{
 			this.setMouseWheelScrolling(false);
-			// removeTouchHandler();
+			removeTouchHandler();
 		}
 	};
 
@@ -509,9 +512,9 @@ var linotype = function(config_options){
 	 * Moves to previous section
 	 */
 	this.moveSectionUp = function(){
-		console.log("moveSectionUp");
+		// console.log("moveSectionUp");
 		var prev = document.querySelector('.section.active').previousElementSibling;
-		console.log("prev",prev);
+		// console.log("prev",prev);
 		//looping to the bottom if there's no more sections above
 		if (!prev && (options.loopTop || options.continuousVertical)) {
 			prev = document.getElementsByClassName('section')[document.getElementsByClassName('section').length - 1];
@@ -527,8 +530,8 @@ var linotype = function(config_options){
 	 */
 	this.moveSectionDown = function (){
 		var next = document.querySelector('.section.active').nextElementSibling;//$('.section.active').next('.section');
-		console.log("moveSectionUp");
-		console.log("next",next);
+		// console.log("moveSectionUp");
+		// console.log("next",next);
 
 		//looping to the top if there's no more sections below
 		if(!next &&
@@ -584,6 +587,7 @@ var linotype = function(config_options){
 		linotypeElement = document.getElementById(options.idSelector);
 		container = linotypeElement;
 
+		//activate touch events
 		this.setAllowScrolling(true);
 
 		if(options.css3){
@@ -809,7 +813,9 @@ var linotype = function(config_options){
 		this.setupEventHandlers();
 	}.bind(this);
 
-	/** The current scroll delay setting */
+	/** 
+	 * The current scroll delay setting
+	 */
 	this.setupEventHandlers = function(){
 		window.addEventListener("hashchange", windowOnHashChangeEvent, false);
 		window.addEventListener("scroll",windowScrollEvent, false);
@@ -823,6 +829,27 @@ var linotype = function(config_options){
 			navlinks[x].addEventListener("click",navigationClickEvent,false);
 		}
 	};
+
+	/**
+	 * Adds the possibility to auto scroll through sections on touch devices.
+	 */
+	function addTouchHandler(){
+		document.removeEventListener('touchstart');
+		document.removeEventListener('MSPointerDown');
+		document.addEventListener('touchstart',touchStartHandler,false);
+		document.addEventListener('MSPointerDown',touchStartHandler,false);
+		document.removeEventListener('touchmove');
+		document.removeEventListener('MSPointerMove');
+		document.addEventListener('touchmove',touchMoveHandler,false);
+		document.addEventListener('MSPointerMove',touchMoveHandler,false);
+	}
+
+	/**
+	 * Removes the auto scrolling for touch devices.
+	 */
+	function removeTouchHandler(){
+		document.removeEventListener('touchmove MSPointerMove');
+	}
 
 	var elementHideCss = domhelper.elementHideCss;
 	var elementContentWrapInner = domhelper.elementContentWrapInner;
@@ -838,6 +865,135 @@ var linotype = function(config_options){
 	var nodeIndexOfNodeList = domhelper.nodeIndexOfNodeList;
 	var getScrollTop = domhelper.getScrollTop;
 	var removeAllClassAndToggle = domhelper.removeAllClassAndToggle;
+
+	function touchStartHandler(e){
+		var touchEvents = getEventsPage(e);
+		touchStartY = touchEvents.y;
+		touchStartX = touchEvents.x;
+	}
+
+	/**
+	 * Gets the pageX and pageY properties depending on the browser.
+	 * https://github.com/alvarotrigo/fullPage.js/issues/194#issuecomment-34069854
+	 */
+	function getEventsPage(e){
+		var events = [];
+		if (window.navigator.msPointerEnabled){
+			events.y = e.pageY;
+			events.x = e.pageX;
+		}else{
+			events.y = e.touches[0].pageY;
+			events.x = e.touches[0].pageX;
+		}
+		return events;
+	}
+
+	/* Detecting touch events 
+	 * As we are changing the top property of the page on scrolling, we can not use the traditional way to detect it.
+	 * This way, the touchstart and the touch moves shows an small difference between them which is the
+	 * used one to determine the direction.
+	*/
+
+	var touchMoveHandler = function(e){
+		// var e = event;
+
+		if(options.autoScrolling){
+			//preventing the easing on iOS devices 
+			e.preventDefault();
+		}
+
+		// additional: if one of the normalScrollElements isn't within options.normalScrollElementTouchThreshold hops up the DOM chain
+		if (!checkParentForNormalScrollElement(e.target)) {
+
+			var touchMoved = false;
+			var activeSection = document.querySelector('.section.active');
+			var scrollable;
+
+			if (!isMoving && !slideMoving) { //if theres any #
+				var touchEvents = getEventsPage(e);
+				touchEndY = touchEvents.y;
+				touchEndX = touchEvents.x;
+
+				//if movement in the X axys is greater than in the Y and the currect section has slides...
+				if (activeSection.getElementsByClassName('slide').length && Math.abs(touchStartX - touchEndX) > (Math.abs(touchStartY - touchEndY))) {
+
+				    //is the movement greater than the minimum resistance to scroll?
+				    if (Math.abs(touchStartX - touchEndX) > (window.innerWidth / 100 * options.touchSensitivity)) {
+				        if (touchStartX > touchEndX) {
+				            this.moveSlideRight(); //next 
+				        } else {
+				            this.moveSlideLeft(); //prev
+				        }
+				    }
+				}
+
+				//vertical scrolling (only when autoScrolling is enabled)
+				else if(options.autoScrolling){
+
+					//if there are landscape slides, we check if the scrolling bar is in the current one or not
+					if(activeSection.getElementsByClassName('slide').length){
+						scrollable= activeSection.querySelector('.slide.active').querySelector('.scrollable');
+					}else{
+						scrollable = activeSection.querySelector('.scrollable');
+					}
+
+					//is the movement greater than the minimum resistance to scroll?
+					if (Math.abs(touchStartY - touchEndY) > (window.innerHeight / 100 * options.touchSensitivity)) {
+						if (touchStartY > touchEndY) {
+							if(scrollable && scrollable.length > 0 ){
+								//is the scrollbar at the end of the scroll?
+								if(isScrolled('bottom', scrollable)){
+									this.moveSectionDown();
+								}else{
+									return true;
+								}
+							}else{
+								// moved down
+								this.moveSectionDown();
+							}
+						} else if (touchEndY > touchStartY) {
+
+							if(scrollable && scrollable.length > 0){
+								//is the scrollbar at the start of the scroll?
+								if(isScrolled('top', scrollable)){
+									this.moveSectionUp();
+								}
+								else{
+									return true;
+								}
+							}else{
+								// moved up
+								this.moveSectionUp();
+							}
+						}
+					}
+				}
+			}
+		}
+	}.bind(this);
+
+	/**
+	 * recursive function to loop up the parent nodes to check if one of them exists in options.normalScrollElements
+	 * Currently works well for iOS - Android might need some testing
+	 * @param  {Element} el  target element / jquery selector (in subsequent nodes)
+	 * @param  {int}     hop current hop compared to options.normalScrollElementTouchThreshold 
+	 * @return {boolean} true if there is a match to options.normalScrollElements
+	 * @todo need to fix parent.isEqualNode to loop through selector of normalscrollelements called from @linotype~touchMoveHandler
+	 */
+	function checkParentForNormalScrollElement (el, hop) {
+		hop = hop || 0;
+		var parent = el.parentNode;
+
+		if (hop < options.normalScrollElementTouchThreshold &&
+			parent.isEqualNode(document.querySelector(options.normalScrollElements)) ) {
+			return true;
+		} else if (hop === options.normalScrollElementTouchThreshold) {
+			return false;
+		} else {
+			return checkParentForNormalScrollElement(parent, ++hop);
+		}
+	}
+
 	/**
 	 * Retuns `up` or `down` depending on the scrolling movement to reach its destination
 	 * from the current section.
@@ -1271,10 +1427,10 @@ var linotype = function(config_options){
 	}
 
 	function scrollPage(element, callback, isMovementUp){
-		console.log("element",element);
+		// console.log("element",element);
 		var scrollOptions = {}, scrolledElement,
 			dest = element.getBoundingClientRect();
-		console.log("dest.top",dest);
+		// console.log("dest.top",dest);
 
 		if(typeof dest === "undefined"){ return; } //there's no element to scroll, leaving the function
 		var dtop = dest.top,
@@ -1535,8 +1691,6 @@ var linotype = function(config_options){
 
 		var scrollHeight = getScrollHeight(section);
 
-		console.log("creating scrollable divs","contentHeight > scrollHeight",(contentHeight > scrollHeight));
-		console.log("scrollHeight",scrollHeight);
 		//needs scroll?
 		if ( contentHeight > scrollHeight) {
 			//was there already an scroll ? Updating it
@@ -1718,17 +1872,19 @@ var linotype = function(config_options){
 	 * @param { string } element - document element
 	 */
 	function getTableHeight(element){
+		console.log("TODO: getTableHeight");
 		var sectionHeight = windowsHeight;
 
-		// if(options.paddingTop || options.paddingBottom){
-		// 	// var section = element;
-		// 	// if(!section.hasClass('section')){
-		// 	// 	section = element.closest('.section');
-		// 	// }
+		if(options.paddingTop || options.paddingBottom){
+			var section = element;
+			if(!classie.hasClass(section,'section')){
+				section = element.closest('.section');
+			}
 
-		// 	// var paddings = parseInt(section.css('padding-top')) + parseInt(section.css('padding-bottom'));
-		// 	// sectionHeight = (windowsHeight - paddings);
-		// }
+			var sectionPaddingBottom = (element.style['padding-bottom'])? parseInt(element.style['padding-bottom'],10) :0,
+			sectionPaddingTop = (element.style['padding-top'])? parseInt(element.style['padding-top'],10) :0;
+			sectionHeight = (windowsHeight - sectionPaddingBottom - sectionPaddingTop);
+		}
 
 		return sectionHeight;
 	}
@@ -2196,8 +2352,11 @@ process.argv = [];
 function noop() {}
 
 process.on = noop;
+process.addListener = noop;
 process.once = noop;
 process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
 process.emit = noop;
 
 process.binding = function (name) {
@@ -2806,8 +2965,8 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-}).call(this,require("/Users/yetse/Developer/github/yawetse/linotype/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":9,"/Users/yetse/Developer/github/yawetse/linotype/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":8,"inherits":7}],11:[function(require,module,exports){
+}).call(this,require("FWaASH"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":9,"FWaASH":8,"inherits":7}],11:[function(require,module,exports){
 /*
  * classie
  * http://github.amexpub.com/modules/classie
