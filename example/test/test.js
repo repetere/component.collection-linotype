@@ -89,8 +89,8 @@ var domhelper = {
 	 * toggles class across nodelist/elementcollection
 	 * @param {object} elementCollection - html dom element
 	 * @param {object} element - html dom element
-	 * @param {string} name of class
-	 * @method
+	 * @param {string} name of class!
+	 * @public
 	 */
 	removeAllClassAndToggle: function(element,elementCollection,toggleClass){
 		//updating the active class
@@ -364,7 +364,9 @@ var classie = require('classie'),
  * @requires module:util-extent
  * @requires module:util
  * @requires module:events
+ * @todo need to finish the .closet implementation for @linotype.getTableHeight method
  * @todo need @linotype~checkParentForNormalScrollElement to fix parent.isEqualNode to loop through selector of normalscrollelements called from @linotype~touchMoveHandler
+ * @throws {ConfigurationError} If conflicting scrolling options are set  
  */
 
 var linotype = function(config_options){
@@ -1563,8 +1565,6 @@ var linotype = function(config_options){
 			silentScroll(getPosition(activeSection).top);
 		};
 
-		console.log("dtop",dtop);
-
 		// Use CSS3 translate functionality or...
 		if (options.css3 && options.autoScrolling) {
 
@@ -1912,7 +1912,6 @@ var linotype = function(config_options){
 	 * @param { string } element - document element
 	 */
 	function getTableHeight(element){
-		console.log("TODO: getTableHeight");
 		var sectionHeight = windowsHeight;
 
 		if(options.paddingTop || options.paddingBottom){
