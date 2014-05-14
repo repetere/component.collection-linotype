@@ -4,7 +4,6 @@
  *
  * Copyright (c) 2014 typesettin. All rights reserved.
  */
-
 'use strict';
 
 module.exports = function(grunt) {
@@ -58,7 +57,8 @@ module.exports = function(grunt) {
         dist : {
             src: ['lib/*.js', 'test/*.js'],
             options: {
-                destination: 'doc'
+                destination: 'doc/html',
+                configure: 'jsdoc.json'
             }
         }
     },

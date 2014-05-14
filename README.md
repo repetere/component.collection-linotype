@@ -1,4 +1,4 @@
-# Linotype [![Build Status](https://travis-ci.org/yawetse/linotype.svg?branch=master)](https://travis-ci.org/yawetse/linotype)
+# Linotype [![Build Status](https://travis-ci.org/yawetse/linotype.svg?branch=master)](https://travis-ci.org/yawetse/linotype) [![NPM version](https://badge.fury.io/js/linotype.svg)](http://badge.fury.io/js/linotype)
 
 ## description
 

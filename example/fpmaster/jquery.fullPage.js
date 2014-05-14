@@ -629,7 +629,7 @@
 
 		    var currentSlide = slides.find('.slide.active');
 		    var destiny = null;
-
+	
 		    if(direction === 'prev'){
 		        destiny = currentSlide.prev('.slide');
 		    }else{
@@ -654,7 +654,6 @@
 		}
 
 		function scrollPage(element, callback, isMovementUp){
-			debugger;
 			var scrollOptions = {}, scrolledElement;
 			var dest = element.position();
 			if(typeof dest === "undefined"){ return; } //there's no element to scroll, leaving the function
@@ -906,7 +905,8 @@
 		 * Scrolling horizontally when clicking on the slider controls.
 		 */
 		$('.section').on('click', '.toSlide', function(e) {
-			e.preventDefault();
+					console.log("toSlide");
+	e.preventDefault();
 			
 			var slides = $(this).closest('.section').find('.slides');
 			var currentSlide = slides.find('.slide.active');
@@ -923,6 +923,8 @@
 		* Scrolls horizontal sliders.
 		*/
 		function landscapeScroll(slides, destiny){
+			// debugger;
+
 			var destinyPos = destiny.position();
 			var slidesContainer = slides.find('.slidesContainer').parent();
 			var slideIndex = destiny.index();
@@ -1302,6 +1304,8 @@
 		 * Scrolls the slider to the given slide destination for the given section
 		 */
 		function scrollSlider(section, slide){
+			/* jshint debug: true */
+			// debugger;
 			if(typeof slide != 'undefined'){
 				var slides = section.find('.slides');
 				var destiny =  slides.find('[data-anchor="'+slide+'"]');
