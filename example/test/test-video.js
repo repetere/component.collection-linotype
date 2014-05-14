@@ -1,31 +1,21 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-// window.onload =function(){
-// 	window.Linotype = new linotype({
-// 		menu: '#menu',
-// 		anchors: ['firstPage', 'secondPage', '3rdPage'],
-// 		slidesColor: ['#C63D0F', '#1BBC9B', '#7E8F7C'],
-// 		autoScrolling: false,
-// 		css3: true
-// 	});
-
-// 	window.Linotype.init();
-// };
-
 // console.log("example test wepps!!s");
 
 var linotype = require('../../../index');
 
 window.onload =function(){
 	window.Linotype = new linotype({
-		menu: '#menu',
-		anchors: ['firstPage', 'secondPage', '3rdPage'],
-		slidesColor: ['#C63D0F', '#1BBC9B', '#7E8F7C'],
-		autoScrolling: false,
-		css3: true
+		verticalCentered: true,
+		slidesColor: ['#1bbc9b', '#4BBFC3', '#7BAABE'],
+		afterRender: function(){
+			//setting the size
+			document.querySelector('video').style.height=window.innerHeight+'px';
+			//playing the video
+			document.querySelector('video').play();
+		}
 	});
-
 	window.Linotype.init();
 };
 },{"../../../index":2}],2:[function(require,module,exports){

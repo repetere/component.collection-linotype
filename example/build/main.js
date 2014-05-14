@@ -390,7 +390,7 @@ var linotype = function(config_options){
 			'loopHorizontal': true,
 			'autoScrolling': true,
 			'scrollOverflow': false,
-			'css3': false,
+			'css3': true,
 			'paddingTop': 0,
 			'paddingBottom': 0,
 			'fixedElements': null,
@@ -809,13 +809,13 @@ var linotype = function(config_options){
 					}
 				}
 				if(typeof options.afterRender === "function"){
-					options.afterRender.call(this);
+					options.afterRender();
 				}
 			});
 		}
 		else{
 			if(typeof options.afterRender === "function"){
-				options.afterRender.call(this);
+				options.afterRender();
 			}
 		}
 
@@ -830,7 +830,7 @@ var linotype = function(config_options){
 			if(!options.animateAnchor && section.length){
 				silentScroll( getPosition(section).top);
 				if(typeof options.afterLoad === "function"){
-					options.afterLoad.call( this, destiny, (nodelistToArray(document.getElementsByClassName('section'),true).indexOf(section.outerHTML) + 1));
+					options.afterLoad( destiny, (nodelistToArray(document.getElementsByClassName('section'),true).indexOf(section.outerHTML) + 1));
 				}
 
 				//updating the active class
@@ -869,7 +869,9 @@ var linotype = function(config_options){
 			navlinks[x].addEventListener("click",navigationClickEvent,false);
 		}
 
-		document.querySelector('.fullPage-slidesNav').addEventListener('click',slideNavClickEvent,false);
+		if(options.slidesNavigation){
+			document.querySelector('.fullPage-slidesNav').addEventListener('click',slideNavClickEvent,false);
+		}
 	};
 
 	/**
@@ -1530,7 +1532,6 @@ var linotype = function(config_options){
 	}
 
 	function scrollPage(element, callback, isMovementUp){
-		// console.log("element",element);
 		var scrollOptions = {}, scrolledElement,
 			dest = getPosition(element);
 
@@ -1645,37 +1646,36 @@ var linotype = function(config_options){
 				continuousVerticalFixSectionOrder();
 				//callback (afterLoad) if the site is not just resizing and readjusting the slides
 				if((typeof options.afterLoad ==='function') && !localIsResizing) {
-					options.afterLoad.call( anchorLink, (sectionIndex + 1));
+					options.afterLoad( anchorLink, (sectionIndex + 1));
 				}
 
 				setTimeout(function () {
 					isMoving = false;
 					if(typeof callback ==='function'){
-						callback.call(this);
+						callback(this);
 					}
 				}, scrollDelay);
 			}, options.scrollingSpeed);
 		}
-		else { // ... use jQuery animate 
-
+		else { // ... use jQuery animate
 			console.log("no css3 sub jquery animate");
 			//callback (onLeave) if the site is not just resizing and readjusting the slides
 			if((typeof options.onLeave ==='function') && !localIsResizing){
 				options.onLeave.call(leavingSection, (sectionIndex + 1), yMovement);
 			}
 
-			container.style.top = -top+'px';
+			container.style.top = -dtop+'px';
 			//fix section order from continuousVertical
 			continuousVerticalFixSectionOrder();
 
 			//callback (afterLoad) if the site is not just resizing and readjusting the slides
 			if((typeof options.afterLoad ==='function') && !localIsResizing){
-				options.afterLoad.call( anchorLink, (sectionIndex + 1));
+				options.afterLoad( anchorLink, (sectionIndex + 1));
 			}
 
 			setTimeout(function () {
 				isMoving = false;
-				if(typeof callback ==='function'){callback.call(this);}
+				if(typeof callback ==='function'){callback(this);}
 			}, scrollDelay);
 		}
 
@@ -1923,6 +1923,7 @@ var linotype = function(config_options){
 
 			// slides.find('.slidesContainer').toggleClass('easing', options.scrollingSpeed>0).css(getTransforms(translate3d));
 
+			classie.addClass( slidesContainer, 'easing' );
 			transformElement( translate3d, slidesContainer);
 
 			setTimeout(function(){
@@ -1947,8 +1948,10 @@ var linotype = function(config_options){
 			slideMoving = false;
 		}
 
-		classie.removeClass(slidesNav.querySelector('.active'),'active');
-		classie.addClass(slidesNav.querySelectorAll('li')[slideIndex].querySelector('a'),'active');
+		if(options.slidesNavigation){
+			classie.removeClass(slidesNav.querySelector('.active'),'active');
+			classie.addClass(slidesNav.querySelectorAll('li')[slideIndex].querySelector('a'),'active');
+		}
 	}
 
 	/**
@@ -2072,7 +2075,6 @@ var linotype = function(config_options){
 	function transformElement(translate3d,element){
 		// container.toggleClass('easing', animated);
 		var transformsObject = getTransforms(translate3d);
-		classie.toggle( element, 'easing' );
 
 		// container.css(getTransforms(translate3d));
 		for(var x in transformsObject){
