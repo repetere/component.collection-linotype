@@ -71,6 +71,7 @@ module.exports = function(grunt) {
           'example/test/test-backgrounds.js': ['client/test/scripts/test_backgrounds.js'],
           'example/test/test-video.js': ['client/test/scripts/test_video.js'],
           'example/test/test-callback.js': ['client/test/scripts/test_callback.js'],
+          'example/test/test-fixedheaders.js': ['client/test/scripts/test_fixedheaders.js'],
           // 'build/main.js': ['client/scripts/**/*.js', 'client/scripts/**/*.coffee'],
         },
         options: {

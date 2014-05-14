@@ -10,9 +10,6 @@ window.onload =function(){
 		anchors: ['firstPage', 'secondPage', '3rdPage', '4thpage', 'lastPage'],
 		menu: '#menu',
 		afterLoad: function(anchorLink, index){
-			console.log("callback");
-			console.log("anchorLink",anchorLink);
-			console.log("index",index);
 			//section 2
 			if(index === 2){
 				//moving the image
