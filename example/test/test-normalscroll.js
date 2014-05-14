@@ -170,6 +170,15 @@ var domhelper = {
 	},
 
 	/**
+	 * Shows DOM elements.
+	 * @method
+	 * @param {node} element - html dom element
+	 */
+	elementShowCss: function(element){
+		element.setAttribute('style',element.getAttribute('style').replace("display: none;"));
+	},
+
+	/**
 	 * Wraps inner elements
 	 * @method
 	 * @param {node} element - html dom element
@@ -259,9 +268,11 @@ var domhelper = {
 			// console.log('body selected');
 			return undefined;
 		}
-		else if( (selectorType==='id' && element.parentNode.id === selector) || element.parentNode.className === selector){
+		else if( (selectorType==='id' && element.parentNode.id === selector) || element.parentNode.className.match(new RegExp(selector,'g'))){
 			// console.log("parent node");
 			return element.parentNode;
+
+			//new RegExp(pattern,modifiers)
 		}
 		else  {
 			// console.log("look up higher");
@@ -375,6 +386,9 @@ var classie = require('classie'),
  * @todo need @linotype~checkParentForNormalScrollElement to fix parent.isEqualNode to loop through selector of normalscrollelements called from @linotype~touchMoveHandler
  * @throws {ConfigurationError} If conflicting scrolling options are set  
  */
+
+/* jshint debug: true */
+// debugger;
 
 var linotype = function(config_options){
 	/** module default configuration */
@@ -610,17 +624,18 @@ var linotype = function(config_options){
 		}
 	};
 
-	/*
-
-	$.fn.fullpage.moveSlideRight = function(){
-		moveSlide('next');
-	}
-
-	$.fn.fullpage.moveSlideLeft = function(){
-		moveSlide('prev');
-	}
-
+	/**
+	 * moves slide right
 	 */
+	this.moveSlideRight = function(){
+		moveSlide('next');
+	};
+	/**
+	 * moves slide left
+	 */
+	this.moveSlideLeft = function(){
+		moveSlide('prev');
+	};
 
 	/**
 	 * intialize a new linotype
@@ -897,6 +912,7 @@ var linotype = function(config_options){
 	}
 
 	var elementHideCss = domhelper.elementHideCss;
+	var elementShowCss = domhelper.elementShowCss;
 	var elementContentWrapInner = domhelper.elementContentWrapInner;
 	var unwrapElement = domhelper.unwrapElement;
 	var onWindowLoaded = domhelper.onWindowLoaded;
@@ -1053,6 +1069,20 @@ var linotype = function(config_options){
 			return 'up';
 		}
 		return 'down';
+	}
+
+	/**
+	 * Retuns `right` or `left` depending on the scrolling movement to reach its destination
+	 * from the current slide.
+	 */
+	function getXmovement(fromIndex, toIndex){
+		if( fromIndex === toIndex){
+			return 'none';
+		}
+		if(fromIndex > toIndex){
+			return 'left';
+		}
+		return 'right';
 	}
 
 	/**	
@@ -1424,58 +1454,54 @@ var linotype = function(config_options){
 	 */
 	function scrollSlider(section, slide){
 		if(typeof slide !== 'undefined' && slide !== 0){
-			var slides = section.querySelectorAll('.slides');
-			var destiny =  slides.querySelector('[data-anchor="'+slide+'"]');
-
-			if(!destiny.length){
-				destiny = slides.querySelectorAll('.slide')[slide];
+			var slides = section.querySelectorAll('.slide');
+			var destiny =  section.querySelector('.slides').querySelector('[data-anchor="'+slide+'"]');
+			if(!destiny){
+				destiny = section.querySelectorAll('.slide')[slide];
 			}
 
-			if(destiny.length){
+			if(destiny){
 				landscapeScroll(slides, destiny);
 			}
 		}
 	}
 
 	function moveSlide(direction){
-		console.log("moveSlide");
-	 //    var activeSection = $('.section.active');
-	 //    var slides = activeSection.find('.slides');
+	    var activeSection = document.querySelector('.section.active');
+	    var slides = activeSection.getElementsByClassName('slide');
 
-	 //    // more than one slide needed and nothing should be sliding
-		// if (!slides.length || slideMoving) {
-		//     return;
-		// }
+	    // more than one slide needed and nothing should be sliding
+		if (!slides.length || slideMoving) {
+		    return;
+		}
 
-	 //    var currentSlide = slides.find('.slide.active');
-	 //    var destiny = null;
+	    var currentSlide = activeSection.querySelector('.slide.active');
+	    var destiny = null;
 
-	 //    if(direction === 'prev'){
-	 //        destiny = currentSlide.prev('.slide');
-	 //    }else{
-	 //        destiny = currentSlide.next('.slide');
-	 //    }
+	    if(direction === 'prev'){
+	        destiny = currentSlide.previousElementSibling;
+	    }else{
+	        destiny = currentSlide.nextElementSibling;
+	    }
 
-	 //    //isn't there a next slide in the secuence?
-		// if(!destiny.length){
-		// 	//respect loopHorizontal settin
-		// 	if (!options.loopHorizontal) return;
+	    //isn't there a next slide in the secuence?
+		if(!destiny){
+			//respect loopHorizontal settin
+			if (!options.loopHorizontal) {return;}
 
-		//     if(direction === 'prev'){
-		//         destiny = currentSlide.siblings(':last');
-		//     }else{
-		//         destiny = currentSlide.siblings(':first');
-		//     }
-		// }
+		    if(direction === 'prev'){
+		        destiny = currentSlide.parentNode.lastElementChild;// currentSlide.siblings(':last');
+		    }else{
+		        destiny = currentSlide.parentNode.firstElementChild;//currentSlide.siblings(':first');
+		    }
+		}
 
-	 //    slideMoving = true;
+	    slideMoving = true;
 
-	 //    landscapeScroll(slides, destiny);
+	    landscapeScroll(slides, destiny);
 	}
 
 	function scrollPage(element, callback, isMovementUp){
-		/* jshint debug: true */
-		// debugger;
 		// console.log("element",element);
 		var scrollOptions = {}, scrolledElement,
 			dest = getPosition(element);
@@ -1595,7 +1621,9 @@ var linotype = function(config_options){
 
 				setTimeout(function () {
 					isMoving = false;
-					if(typeof callback ==='function'){callback.call(this);}
+					if(typeof callback ==='function'){
+						callback.call(this);
+					}
 				}, scrollDelay);
 			}, options.scrollingSpeed);
 		}
@@ -1801,80 +1829,97 @@ var linotype = function(config_options){
 	 * Scrolls horizontal sliders.
 	 */
 	function landscapeScroll(slides, destiny){
-		console.log("landscapeScroll");
-		// var destinyPos = destiny.position();
-		// var slidesContainer = slides.find('.slidesContainer').parent();
-		// var slideIndex = destiny.index();
-		// var section = slides.closest('.section');
-		// var sectionIndex = section.index('.section');
-		// var anchorLink = section.data('anchor');
-		// var slidesNav = section.find('.fullPage-slidesNav');
-		// var slideAnchor = destiny.data('anchor');
+		// console.log("landscapeScroll");
+		var destinyPos = getPosition(destiny),
+			slidesContainer = destiny.parentNode,
+			slideIndex = nodeIndexOfNodeList(slides,destiny),
+			section = getParentElement(destiny,'section'),
+			sectionIndex = nodeIndexOfNodeList(document.getElementsByClassName('section'),section),
+			anchorLink = section.getAttribute('data-anchor'),
+			slidesNav = section.querySelector('.fullPage-slidesNav'),
+			slideAnchor = destiny.getAttribute('data-anchor');
 
-		// //caching the value of isResizing at the momment the function is called 
-		// //because it will be checked later inside a setTimeout and the value might change
-		// var localIsResizing = isResizing;
+		//caching the value of isResizing at the momment the function is called 
+		//because it will be checked later inside a setTimeout and the value might change
+		var localIsResizing = isResizing;
 
-		// if(options.onSlideLeave){
-		// 	var prevSlideIndex = section.find('.slide.active').index();
-		// 	var xMovement = getXmovement(prevSlideIndex, slideIndex);
+		if(options.onSlideLeave){
+			var prevSlideIndex = nodeIndexOfNodeList(section.querySelectorAll('.slide'),section.querySelector('.slide.active'));
+			var xMovement = getXmovement(prevSlideIndex, slideIndex);
 
-		// 	//if the site is not just resizing and readjusting the slides
-		// 	if(!localIsResizing){
-		// 		$.isFunction( options.onSlideLeave ) && options.onSlideLeave.call( this, anchorLink, (sectionIndex + 1), prevSlideIndex, xMovement);
-		// 	}
-		// }
+			//if the site is not just resizing and readjusting the slides
+			if(!localIsResizing){
+				if(typeof options.onSlideLeave ==='function' ){
+					options.onSlideLeave.call( anchorLink, (sectionIndex + 1), prevSlideIndex, xMovement);
+				}
+			}
+		}
 
-		// destiny.addClass('active').siblings().removeClass('active');
+		var elementCol = section.getElementsByClassName('slide');
+		removeAllClassAndToggle(destiny,elementCol,'active');
 
-		// if(typeof slideAnchor === 'undefined'){
-		// 	slideAnchor = slideIndex;
-		// }
+		if(typeof slideAnchor === 'undefined' ||  slideAnchor === null){
+			slideAnchor = slideIndex;
+		}
 
-		// //only changing the URL if the slides are in the current section (not for resize re-adjusting)
-		// if(section.hasClass('active')){
+		//only changing the URL if the slides are in the current section (not for resize re-adjusting)
+		if(classie.hasClass(section,'active')){
 
-		// 	if(!options.loopHorizontal){
-		// 		//hidding it for the fist slide, showing for the rest
-		// 		section.find('.controlArrow.prev').toggle(slideIndex!=0);
+			if(!options.loopHorizontal){
+				var prevarrow =section.querySelector('.controlArrow.prev'),
+					nextarrow = section.querySelector('.controlArrow.next');
+				//hidding it for the fist slide, showing for the rest
+				if(slideIndex!==0){
+					elementShowCss(prevarrow);
+				}
+				else{
+					elementHideCss(prevarrow);
+				}
 
-		// 		//hidding it for the last slide, showing for the rest
-		// 		section.find('.controlArrow.next').toggle(!destiny.is(':last-child'));
-		// 	}
+				//hidding it for the last slide, showing for the rest
+				if(nodeIndexOfNodeList(elementCol,destiny) === elementCol.length-1){
+					elementHideCss(nextarrow);
+				}
+				else{
+					elementShowCss(nextarrow);
+				}
+			}
 
-		// 	setURLHash(slideIndex, slideAnchor, anchorLink);
+			setURLHash(slideIndex, slideAnchor, anchorLink);
 
-		// }
+		}
 
-		// if(options.css3){
-		// 	var translate3d = 'translate3d(-' + destinyPos.left + 'px, 0px, 0px)';
+		if(options.css3){
+			var translate3d = 'translate3d(-' + destinyPos.left + 'px, 0px, 0px)';
 
-		// 	slides.find('.slidesContainer').toggleClass('easing', options.scrollingSpeed>0).css(getTransforms(translate3d));
+			// slides.find('.slidesContainer').toggleClass('easing', options.scrollingSpeed>0).css(getTransforms(translate3d));
 
-		// 	setTimeout(function(){
-		// 		//if the site is not just resizing and readjusting the slides
-		// 		if(!localIsResizing){
-		// 			$.isFunction( options.afterSlideLoad ) && options.afterSlideLoad.call( this, anchorLink, (sectionIndex + 1), slideAnchor, slideIndex );
-		// 		}
+			transformElement( translate3d, slidesContainer);
 
-		// 		slideMoving = false;
-		// 	}, options.scrollingSpeed, options.easing);
-		// }else{
-		// 	slidesContainer.animate({
-		// 		scrollLeft : destinyPos.left
-		// 	}, options.scrollingSpeed, options.easing, function() {
+			setTimeout(function(){
+				//if the site is not just resizing and readjusting the slides
+				if(!localIsResizing){
+					if(typeof options.afterSlideLoad ==='function'){ options.afterSlideLoad.call( this, anchorLink, (sectionIndex + 1), slideAnchor, slideIndex );
+					}
+				}
 
-		// 		//if the site is not just resizing and readjusting the slides
-		// 		if(!localIsResizing){
-		// 			$.isFunction( options.afterSlideLoad ) && options.afterSlideLoad.call( this, anchorLink, (sectionIndex + 1), slideAnchor, slideIndex);
-		// 		}	
-		// 		//letting them slide again
-		// 		slideMoving = false; 
-		// 	});
-		// }
+				slideMoving = false;
+			}, options.scrollingSpeed, options.easing);
+		}else{
+			console.log("no css3 sub jquery animate");
 
-		// slidesNav.find('.active').removeClass('active');
-		// slidesNav.find('li').eq(slideIndex).find('a').addClass('active');
+			slidesContainer.style.scrollLeft = destinyPos.left;
+
+			//if the site is not just resizing and readjusting the slides
+			if(!localIsResizing){
+				if(typeof options.afterSlideLoad ==='function' ){ options.afterSlideLoad.call( anchorLink, (sectionIndex + 1), slideAnchor, slideIndex);}
+			}
+			//letting them slide again
+			slideMoving = false;
+		}
+
+		classie.removeClass(slidesNav.querySelector('.active'),'active');
+		classie.addClass(slidesNav.querySelectorAll('li')[slideIndex].querySelector('a'),'active');
 	}
 
 	/**
@@ -1993,6 +2038,17 @@ var linotype = function(config_options){
 		// container.css(getTransforms(translate3d));
 		for(var x in transformsObject){
 			container.style[x] = transformsObject[x];
+		}
+	}
+
+	function transformElement(translate3d,element){
+		// container.toggleClass('easing', animated);
+		var transformsObject = getTransforms(translate3d);
+		classie.toggle( element, 'easing' );
+
+		// container.css(getTransforms(translate3d));
+		for(var x in transformsObject){
+			element.style[x] = transformsObject[x];
 		}
 	}
 
