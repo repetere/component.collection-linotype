@@ -830,7 +830,7 @@ var linotype = function(config_options){
 			if(!options.animateAnchor && section.length){
 				silentScroll( getPosition(section).top);
 				if(typeof options.afterLoad === "function"){
-					options.afterLoad.call( this, destiny, (nodelistToArray(document.getElementsByClassName('section'),true).indexOf(section.outerHTML) + 1));
+					options.afterLoad( destiny, (nodelistToArray(document.getElementsByClassName('section'),true).indexOf(section.outerHTML) + 1));
 				}
 
 				//updating the active class
@@ -1646,13 +1646,13 @@ var linotype = function(config_options){
 				continuousVerticalFixSectionOrder();
 				//callback (afterLoad) if the site is not just resizing and readjusting the slides
 				if((typeof options.afterLoad ==='function') && !localIsResizing) {
-					options.afterLoad.call( anchorLink, (sectionIndex + 1));
+					options.afterLoad( anchorLink, (sectionIndex + 1));
 				}
 
 				setTimeout(function () {
 					isMoving = false;
 					if(typeof callback ==='function'){
-						callback.call(this);
+						callback(this);
 					}
 				}, scrollDelay);
 			}, options.scrollingSpeed);
@@ -1670,12 +1670,12 @@ var linotype = function(config_options){
 
 			//callback (afterLoad) if the site is not just resizing and readjusting the slides
 			if((typeof options.afterLoad ==='function') && !localIsResizing){
-				options.afterLoad.call( anchorLink, (sectionIndex + 1));
+				options.afterLoad( anchorLink, (sectionIndex + 1));
 			}
 
 			setTimeout(function () {
 				isMoving = false;
-				if(typeof callback ==='function'){callback.call(this);}
+				if(typeof callback ==='function'){callback(this);}
 			}, scrollDelay);
 		}
 
