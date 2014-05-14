@@ -883,6 +883,10 @@ var linotype = function(config_options){
 		window.addEventListener("resize",windowResizeEvent, false);
 
 		document.addEventListener("keydown",keydownEvent,false);
+		var sections = document.querySelectorAll('.section');
+		for(var t =0; t<sections.length;t++){
+			sections[t].addEventListener("click",sectionClickEvent,false);
+		}
 
 		var navlinks = document.querySelectorAll('#fullPage-nav a');
 		for(var x =0; x<navlinks.length;x++){
@@ -1292,6 +1296,34 @@ var linotype = function(config_options){
 
 		scrollPage(document.getElementsByClassName('section')[index]);
 	}
+
+	//click events
+	var sectionClickEvent = function(e){
+		var eventTarget = e.target;
+
+		if(classie.hasClass(eventTarget,'controlArrow')){
+			if(classie.hasClass(eventTarget,'prev')){
+				this.moveSlideLeft();
+			}
+			else{
+				this.moveSlideRight();
+			}
+		}
+		else if(classie.hasClass(eventTarget,'toSlide')){
+			e.preventDefault();
+
+			console.log("toSlide");
+			// var slides = $(this).closest('.section').find('.slides');
+			// var currentSlide = slides.find('.slide.active');
+			// var destiny = null;
+
+			// destiny = slides.find('.slide').eq( ($(this).data('index') -1) );
+
+			// if(destiny.length > 0){
+			// 	landscapeScroll(slides, destiny);
+			// }
+		}
+	}.bind(this);
 
 	//window resize event
 	function windowResizeEvent(e){

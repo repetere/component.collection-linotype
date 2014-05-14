@@ -905,7 +905,8 @@
 		 * Scrolling horizontally when clicking on the slider controls.
 		 */
 		$('.section').on('click', '.toSlide', function(e) {
-			e.preventDefault();
+					console.log("toSlide");
+	e.preventDefault();
 			
 			var slides = $(this).closest('.section').find('.slides');
 			var currentSlide = slides.find('.slide.active');
@@ -922,7 +923,7 @@
 		* Scrolls horizontal sliders.
 		*/
 		function landscapeScroll(slides, destiny){
-			debugger;
+			// debugger;
 
 			var destinyPos = destiny.position();
 			var slidesContainer = slides.find('.slidesContainer').parent();
