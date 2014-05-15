@@ -172,7 +172,7 @@ var domhelper = {
 	elementContentWrapInner: function(element,innerElement){
 		var wrapper = element,
 			w = innerElement,
-			len = element.children.length,
+			len = element.childElementCount,
 			wrapper_clone = wrapper.cloneNode(true);
 
 		wrapper.innerHTML='';
@@ -559,13 +559,15 @@ var linotype = function(config_options){
 		// console.log("moveSectionUp");
 		var prev = document.querySelector('.section.active').previousElementSibling;
 		// console.log("prev",prev);
-		//looping to the bottom if there's no more sections above
-		if (!prev && (options.loopTop || options.continuousVertical)) {
-			prev = document.getElementsByClassName('section')[document.getElementsByClassName('section').length - 1];
-		}
+		if(prev && classie.hasClass(prev,'section')){
+			//looping to the bottom if there's no more sections above
+			if (!prev && (options.loopTop || options.continuousVertical)) {
+				prev = document.getElementsByClassName('section')[document.getElementsByClassName('section').length - 1];
+			}
 
-		if (prev) {
-			scrollPage(prev, null, true);
+			if (prev) {
+				scrollPage(prev, null, true);
+			}
 		}
 	};
 
@@ -573,18 +575,18 @@ var linotype = function(config_options){
 	 * Moves to next section
 	 */
 	this.moveSectionDown = function (){
-		var next = document.querySelector('.section.active').nextElementSibling;//$('.section.active').next('.section');
-		// console.log("moveSectionUp");
-		// console.log("next",next);
+		var next = document.querySelector('.section.active').nextElementSibling;
 
-		//looping to the top if there's no more sections below
-		if(!next &&
-			(options.loopBottom || options.continuousVertical)){
-			next = document.getElementsByClassName('section')[0];//$('.section').first();
-		}
+		if(next && classie.hasClass(next,'section')){
+			//looping to the top if there's no more sections below
+			if(!next &&
+				(options.loopBottom || options.continuousVertical)){
+				next = document.getElementsByClassName('section')[0];//$('.section').first();
+			}
 
-		if(next){
-			scrollPage(next, null, false);
+			if(next){
+				scrollPage(next, null, false);
+			}
 		}
 	};
 
@@ -647,7 +649,7 @@ var linotype = function(config_options){
 		else{
 			var oldBodyHTML = document.getElementsByTagName('body')[0].innerHTML;
 			document.getElementsByTagName('body')[0].innerHTML='<div id="superContainer">'+oldBodyHTML+'</div>';
-			container = document.getElementById('#superContainer');
+			container = document.getElementById('superContainer');
 		}
 
 		//creating the navigation dots 
@@ -780,7 +782,7 @@ var linotype = function(config_options){
 
 		// //fixed elements need to be moved out of the plugin container due to problems with CSS3.
 		if(options.fixedElements && options.css3){
-			document.getElementsByTagName('body')[0].appendChild(options.fixedElements);
+			document.getElementsByTagName('body')[0].appendChild(document.querySelector(options.fixedElements));
 		}
 
 		//vertical centered of the navigation + first bullet active
@@ -1147,6 +1149,8 @@ var linotype = function(config_options){
 	 * http://www.sitepoint.com/html5-javascript-mouse-wheel/
 	 */
 	var MouseWheelHandler = function (e){
+		/* jshint debug:true */
+		// debugger;
 		if(options.autoScrolling){
 			// cross-browser wheel delta
 			e = window.event || e;
@@ -1169,7 +1173,7 @@ var linotype = function(config_options){
 
 				//scrolling down?
 				if (delta < 0) {
-					if(scrollable && scrollable.length > 0 ){
+					if(scrollable){
 						//is the scrollbar at the end of the scroll?
 						if(isScrolled('bottom', scrollable)){
 							this.moveSectionDown();
@@ -1183,7 +1187,7 @@ var linotype = function(config_options){
 
 				//scrolling up?
 				else {
-					if(scrollable && scrollable.length > 0){
+					if(scrollable){
 						//is the scrollbar at the start of the scroll?
 						if(isScrolled('top', scrollable)){
 							this.moveSectionUp();
@@ -1475,16 +1479,17 @@ var linotype = function(config_options){
 			section = document.getElementsByClassName('section')[(destiny -1)];
 		}
 
-
-		//we need to scroll to the section and then to the slide
-		if (destiny !== lastScrolledDestiny && !classie.hasClass(section,'active')){
-			scrollPage(section, function(){
+		if(section){
+			//we need to scroll to the section and then to the slide
+			if (destiny !== lastScrolledDestiny && !classie.hasClass(section,'active')){
+				scrollPage(section, function(){
+					scrollSlider(section, slide);
+				});
+			}
+			//if we were already in the section
+			else{
 				scrollSlider(section, slide);
-			});
-		}
-		//if we were already in the section
-		else{
-			scrollSlider(section, slide);
+			}
 		}
 	}
 
@@ -1756,9 +1761,9 @@ var linotype = function(config_options){
 	 */
 	function isScrolled(type, scrollable){
 		if(type === 'top'){
-			return !scrollable.scrollTop();
+			return !scrollable.scrollTop;
 		}else if(type === 'bottom'){
-			return scrollable.scrollTop() + scrollable.innerHeight() >= scrollable[0].scrollHeight;
+			return scrollable.scrollTop + container.offsetHeight >= scrollable.scrollHeight;
 		}
 	}
 
@@ -1817,7 +1822,7 @@ var linotype = function(config_options){
 					scrollableEl.setAttribute('class','scrollable');
 
 				if(options.verticalCentered){
-					elementContentWrapInner(element.getElementsByClassName('tableCell'),scrollableEl);
+					elementContentWrapInner(element.querySelector('.tableCell'),scrollableEl);
 				}else{
 					elementContentWrapInner(element,scrollableEl);
 				}
@@ -1994,7 +1999,7 @@ var linotype = function(config_options){
 		classie.addClass(element,'table');
 		var slidesTableContainerEl = document.createElement("div");
 		slidesTableContainerEl.setAttribute('class','tableCell');
-		slidesTableContainerEl.setAttribute('style',"height:'" + getTableHeight(element) + "'px;");
+		slidesTableContainerEl.setAttribute('style',"height:" + getTableHeight(element) + "px;");
 
 		elementContentWrapInner(element,slidesTableContainerEl);
 	}
@@ -2493,8 +2498,11 @@ process.argv = [];
 function noop() {}
 
 process.on = noop;
+process.addListener = noop;
 process.once = noop;
 process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
 process.emit = noop;
 
 process.binding = function (name) {
@@ -3103,8 +3111,8 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-}).call(this,require("/Users/yetse/Developer/github/yawetse/linotype/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":9,"/Users/yetse/Developer/github/yawetse/linotype/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":8,"inherits":7}],11:[function(require,module,exports){
+}).call(this,require("FWaASH"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":9,"FWaASH":8,"inherits":7}],11:[function(require,module,exports){
 /*
  * classie
  * http://github.amexpub.com/modules/classie
