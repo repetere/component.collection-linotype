@@ -1,106 +1,149 @@
-/*
- * linotype
- * https://github.com/typesettin/linotype
- * @author yaw joseph etse
- * Copyright (c) 2014 Typesettin. All rights reserved.
+/*! Copyright (c) 2011 Piotr Rochala (http://rocha.la)
+ * Dual licensed under the MIT (http://www.opensource.org/licenses/mit-license.php)
+ * and GPL (http://www.opensource.org/licenses/gpl-license.php) licenses.
+ *
+ * Version: 1.3.2
+ *
  */
+(function($) {
 
-'use strict';
+  jQuery.fn.extend({
+    slimScroll: function(options) {
 
-var classie = require('classie'),
-	extend = require('util-extend'),
-	domhelper = require('./domhelper');
-// 	events = require('events'),
-// 	util = require('util');
+      var defaults = {
 
-/**
- * creates slim scrollers.
- * @author yaw joseph etse
- * @module
- */
-var Slimscroll = function(element,options){
-	var defaults = {
-			width : 'auto',// width in pixels of the visible scroll area
-			height : '250px',// height in pixels of the visible scroll area
-			size : '7px',// width in pixels of the scrollbar and rail
-			color: '#000',// scrollbar color, accepts any hex/color value
-			position : 'right',// scrollbar position - left/right
-			distance : '1px',// distance in pixels between the side edge and the scrollbar
-			start : 'top',// default scroll position on load - top / bottom / $('selector')
-			opacity : 0.4,// sets scrollbar opacity
-			alwaysVisible : false,// enables always-on mode for the scrollbar
-			disableFadeOut : false,// check if we should hide the scrollbar when user is hovering over
-			railVisible : false,// sets visibility of the rail
-			railColor : '#333',// sets rail color
-			railOpacity : 0.2,// sets rail opacity
-			railDraggable : true,// whether  we should use jQuery UI Draggable to enable bar dragging
-			railClass : 'slimScrollRail',// defautlt CSS class of the slimscroll rail
-			barClass : 'slimScrollBar',// defautlt CSS class of the slimscroll bar
-			wrapperClass : 'slimScrollDiv',// defautlt CSS class of the slimscroll wrapper
-			allowPageScroll : false,// check if mousewheel should scroll the window if we reach top/bottom
-			wheelStep : 20,// scroll amount applied to each mouse wheel step
-			touchScrollStep : 200,// scroll amount applied when user is using gestures
-			borderRadius: '7px',// sets border radius
-			railBorderRadius : '7px'// sets border radius of the rail
-		},
-		o = extend( defaults,options ),
-		thisElements = document.querySelectorAll(element);
-    // do it for every element that matches selector
-    for(var x=0; x<thisElements.length;x++){
-		var isOverPanel, isOverBar, isDragg, queueHide, touchDif,
-		barHeight, percentScroll, lastScroll,
-		divS = '<div></div>',
-		minBarHeight = 30,
-		releaseScroll = false;
+        // width in pixels of the visible scroll area
+        width : 'auto',
 
-		// used in event handlers and for better minification
-		var me = thisElements[x];
+        // height in pixels of the visible scroll area
+        height : '250px',
 
-		// ensure we are not binding it again
-		if( classie.hasClass(me.parentNode,o.wrapperClass) ){
-			// start from last bar position
-			var offset = me.scrollTop,
-				bar = me.parentNode.querSelector('.' + o.barClass),// find bar and rail,
-				rail = me.parentNode.querSelector('.' + o.railClass);
+        // width in pixels of the scrollbar and rail
+        size : '7px',
 
-			console.log("add getbarheight");
-			// getBarHeight();
+        // scrollbar color, accepts any hex/color value
+        color: '#000',
 
-			// check if we should scroll existing instance
-			if (typeof options==='object'){
-				// Pass height: auto to an existing slimscroll object to force a resize after contents have changed
-				if ( 'height' in options && options.height === 'auto' ) {
-					me.parentNode.style.height='auto';
-					me.style.height='auto';
-					var height = me.parentNode.parentNode.scrollHeight;
-					me.parent.style.height=height;
-					me.style.height=height;
-				}
+        // scrollbar position - left/right
+        position : 'right',
 
-				if ('scrollTo' in options){
-					// jump to a static point
-					offset = parseInt(o.scrollTo,10);
-				}
-				else if ('scrollBy' in options){
-					// jump by value pixels
-					offset += parseInt(o.scrollBy,10);
-				}
-				else if ('destroy' in options){
-					// remove slimscroll elements
-					domhelper.removeElement(bar);
-					domhelper.removeElement(rail);
-					domhelper.unwrapElement(me);
-					return;
-				}
+        // distance in pixels between the side edge and the scrollbar
+        distance : '1px',
 
-				// scroll content by the given offset
-				console.log("add scrollContent");
-				// scrollContent(offset, false, true);
-			}
-			return;
-		}
-		/*
-		// optionally set height to the parent's height
+        // default scroll position on load - top / bottom / $('selector')
+        start : 'top',
+
+        // sets scrollbar opacity
+        opacity : .4,
+
+        // enables always-on mode for the scrollbar
+        alwaysVisible : false,
+
+        // check if we should hide the scrollbar when user is hovering over
+        disableFadeOut : false,
+
+        // sets visibility of the rail
+        railVisible : false,
+
+        // sets rail color
+        railColor : '#333',
+
+        // sets rail opacity
+        railOpacity : .2,
+
+        // whether  we should use jQuery UI Draggable to enable bar dragging
+        railDraggable : true,
+
+        // defautlt CSS class of the slimscroll rail
+        railClass : 'slimScrollRail',
+
+        // defautlt CSS class of the slimscroll bar
+        barClass : 'slimScrollBar',
+
+        // defautlt CSS class of the slimscroll wrapper
+        wrapperClass : 'slimScrollDiv',
+
+        // check if mousewheel should scroll the window if we reach top/bottom
+        allowPageScroll : false,
+
+        // scroll amount applied to each mouse wheel step
+        wheelStep : 20,
+
+        // scroll amount applied when user is using gestures
+        touchScrollStep : 200,
+
+        // sets border radius
+        borderRadius: '7px',
+
+        // sets border radius of the rail
+        railBorderRadius : '7px'
+      };
+
+      var o = $.extend(defaults, options);
+
+      // do it for every element that matches selector
+      this.each(function(){
+
+      var isOverPanel, isOverBar, isDragg, queueHide, touchDif,
+        barHeight, percentScroll, lastScroll,
+        divS = '<div></div>',
+        minBarHeight = 30,
+        releaseScroll = false;
+
+        // used in event handlers and for better minification
+        var me = $(this);
+
+        // ensure we are not binding it again
+        if (me.parent().hasClass(o.wrapperClass))
+        {
+            // start from last bar position
+            var offset = me.scrollTop();
+
+            // find bar and rail
+            bar = me.parent().find('.' + o.barClass);
+            rail = me.parent().find('.' + o.railClass);
+
+            getBarHeight();
+
+            // check if we should scroll existing instance
+            if ($.isPlainObject(options))
+            {
+              // Pass height: auto to an existing slimscroll object to force a resize after contents have changed
+              if ( 'height' in options && options.height == 'auto' ) {
+                me.parent().css('height', 'auto');
+                me.css('height', 'auto');
+                var height = me.parent().parent().height();
+                me.parent().css('height', height);
+                me.css('height', height);
+              }
+
+              if ('scrollTo' in options)
+              {
+                // jump to a static point
+                offset = parseInt(o.scrollTo);
+              }
+              else if ('scrollBy' in options)
+              {
+                // jump by value pixels
+                offset += parseInt(o.scrollBy);
+              }
+              else if ('destroy' in options)
+              {
+                // remove slimscroll elements
+                bar.remove();
+                rail.remove();
+                me.unwrap();
+                return;
+              }
+
+              // scroll content by the given offset
+              scrollContent(offset, false, true);
+            }
+
+            return;
+        }
+
+        // optionally set height to the parent's height
         o.height = (options.height == 'auto') ? me.parent().height() : options.height;
 
         // wrap content
@@ -227,8 +270,8 @@ var Slimscroll = function(element,options){
           // prevent scrolling the page if necessary
           if(!releaseScroll)
           {
-			e.originalEvent.preventDefault();
-			}
+  		      e.originalEvent.preventDefault();
+		      }
           if (e.originalEvent.touches.length)
           {
             // see how far user swiped
@@ -237,10 +280,7 @@ var Slimscroll = function(element,options){
             scrollContent(diff, true);
             touchDif = e.originalEvent.touches[0].pageY;
           }
-
-		 */
-	}
-/*      
+        });
 
         // set up initial height
         getBarHeight();
@@ -408,13 +448,16 @@ var Slimscroll = function(element,options){
             }, 1000);
           }
         }
-*/
-};
 
-module.exports = Slimscroll;
+      });
 
-// If there is a window object, that at least has a document property,
-// define linotype
-if ( typeof window === "object" && typeof window.document === "object" ) {
-	window.Slimscroll = Slimscroll;
-}
+      // maintain chainability
+      return this;
+    }
+  });
+
+  jQuery.fn.extend({
+    slimscroll: jQuery.fn.slimScroll
+  });
+
+})(jQuery);
