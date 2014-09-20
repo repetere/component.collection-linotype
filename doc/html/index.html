@@ -41,8 +41,54 @@
 
 
     <section>
-        <article><h1>Linotype <a href="https://travis-ci.org/yawetse/linotype"><img src="https://travis-ci.org/yawetse/linotype.svg?branch=master" alt="Build Status"></a> <a href="http://badge.fury.io/js/linotypejs"><img src="https://badge.fury.io/js/linotypejs.svg" alt="NPM version"></a></h1><h2>description</h2><p>full page composition module</p>
-<h2>about</h2><p>The linotype machine (/ˈlaɪnətaɪp/ lyn-ə-typ) is a &quot;line casting&quot; machine used in printing. Along with letterpress printing, linotype was the industry standard for newspapers, magazines and posters from the late 19th century to the 1960s and 70s, when it was largely replaced by offset lithography printing and computer typesetting. The name of the machine comes from the fact that it produces an entire line of metal type at once, hence a line-o'-type, a significant improvement over the previous industry standard, i.e., manual, letter-by-letter typesetting using a composing stick and drawers of letters.  The linotype machine operator enters text on a 90-character keyboard. The machine assembles matrices, which are molds for the letter forms, in a line. The assembled line is then cast as a single piece, called a slug, of type metal in a process known as &quot;hot metal&quot; typesetting. The matrices are then returned to the type magazine from which they came, to be reused later. This allows much faster typesetting and composition than original hand composition in which operators place down one pre-cast metal letter, punctuation mark or space at a time.  The machine revolutionized typesetting and with it especially newspaper publishing, making it possible for a relatively small number of operators to set type for many pages on a daily basis. Before Mergenthaler's invention of the linotype in 1884, no daily newspaper in the world had more than eight pages.</p></article>
+        <article><h1>component.collection-linotype <a href="https://travis-ci.org/typesettin/component.collection-linotype"><img src="https://travis-ci.org/typesettin/component.collection-linotype.svg?branch=master" alt="Build Status"></a> <a href="http://badge.fury.io/js/linotypejs"><img src="https://badge.fury.io/js/linotypejs.svg" alt="NPM version"></a></h1><h2>Example</h2><p>Check out <code>example/index.html</code>, the example javascript for the example page is <code>resources/js/example_src.js</code> and in the head section of the respective examples. Full non-js graceful fallback</p>
+<p><a href="http://typesettin.github.io/component.collection-linotype">Live Demo - http://typesettin.github.io/component.collection-linotype</a></p>
+<h2>Installation</h2><pre class="prettyprint source"><code>$ npm install linotypejs</code></pre><p>The full page scroll component is a browserify javascript module.</p>
+<h2>Usage</h2><p><em>JavaScript</em></p>
+<pre class="prettyprint source lang-javascript"><code>var LinotypeObject = require('linotypejs'),
+    myLinotype;
+//initialize linotype component after the dom has loaded
+window.addEventListener('load',function(){
+    myLinotype = new LinotypeObject({
+        idSelector: 'linotype'
+    });
+    //expose your nav component to the window global namespace
+    window.myLinotype = myLinotype;
+});</code></pre><p><em>HTML</em></p>
+<pre class="prettyprint source lang-html"><code>&lt;html>
+    &lt;head>
+      &lt;title>Your Page&lt;/title>
+      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;[path/to]/component.collection-linotype.css&quot;>
+      &lt;script src='[path/to/browserify/bundle].js'>&lt;/script>
+    &lt;/head>
+    &lt;body>
+    &lt;div id=&quot;linotype&quot; class=&quot;linotype&quot;>
+        &lt;div class=&quot;section active&quot;>
+            &lt;h1>Page One &lt;/h1>
+            &lt;p>the basic structure, require a linotype class (for css) and sections for each fullpage section&lt;/p>
+          &lt;/div>
+          &lt;div class=&quot;section&quot;>
+            &lt;h1>Page Two &lt;/h1>
+            &lt;p>Any html content can go here&lt;/p>
+          &lt;/div>
+          &lt;div class=&quot;section&quot;>
+            &lt;h1>Page Three &lt;/h1>
+            &lt;p>Keyboard, MouseWheel and Touch Support&lt;/p>
+          &lt;/div>
+          &lt;div class=&quot;section&quot;>
+            &lt;h1>Page Four &lt;/h1>
+          &lt;/div>
+    &lt;/body>
+&lt;/html></code></pre><h2>API</h2><pre class="prettyprint source lang-javascript"><code>myLinotype.section(1); //jump to section 1</code></pre><h3><a href="https://github.com/typesettin/component.collection-linotype/blob/master/doc/api.md"><em>FULL API DOCUMENTATION</em></a></h3><h2>Development</h2><p><em>Make sure you have grunt installed</em></p>
+<pre class="prettyprint source"><code>$ npm install -g grunt-cli</code></pre><p>Then run grunt watch</p>
+<pre class="prettyprint source"><code>$ grunt watch</code></pre><h2>Notes</h2><ul>
+<li>The Navigation Module uses Node's event Emitter for event handling.</li>
+<li>The less file is located in <code>resources/stylesheets</code></li>
+</ul>
+<h3>About Linotypes</h3><p>The linotype machine (/ˈlaɪnətaɪp/ lyn-ə-typ) is a &quot;line casting&quot; machine used in printing. Along with letterpress printing, linotype was the industry standard for newspapers, magazines and posters from the late 19th century to the 1960s and 70s, when it was largely replaced by offset lithography printing and computer typesetting. </p>
+<p>The name of the machine comes from the fact that it produces an entire line of metal type at once, hence a line-o'-type, a significant improvement over the previous industry standard, i.e., manual, letter-by-letter typesetting using a composing stick and drawers of letters.  The linotype machine operator enters text on a 90-character keyboard. </p>
+<p>The machine assembles matrices, which are molds for the letter forms, in a line. The assembled line is then cast as a single piece, called a slug, of type metal in a process known as &quot;hot metal&quot; typesetting. The matrices are then returned to the type magazine from which they came, to be reused later. This allows much faster typesetting and composition than original hand composition in which operators place down one pre-cast metal letter, punctuation mark or space at a time.  </p>
+<p>The machine revolutionized typesetting and with it especially newspaper publishing, making it possible for a relatively small number of operators to set type for many pages on a daily basis. Before Mergenthaler's invention of the linotype in 1884, no daily newspaper in the world had more than eight pages.</p></article>
     </section>
 
 
@@ -59,7 +105,7 @@
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Sat Sep 20 2014 00:59:20 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Sat Sep 20 2014 01:19:33 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>
