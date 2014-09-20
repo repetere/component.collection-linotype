@@ -4,6 +4,8 @@
 
 Check out `example/index.html`, the example javascript for the example page is `resources/js/example_src.js` and in the head section of the respective examples. Full non-js graceful fallback
 
+[Live Demo - http://typesettin.github.io/component.collection-linotype](http://typesettin.github.io/component.collection-linotype)
+
 ## Installation
 
 ```
