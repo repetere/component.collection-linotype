@@ -27,6 +27,8 @@ var classie = require('classie'),
 	util = require('util'),
 	touchStartY = 0,
 	touchStartX = 0,
+	touchMoveStartY = 0,
+	touchMoveStartX = 0,
 	touchEndY = 0,
 	touchEndX = 0;
 
@@ -176,6 +178,10 @@ Linotype.prototype.initEventListeners = function () {
 			events.y = e.pageY;
 			events.x = e.pageX;
 		}
+		else if (e.changedTouches) {
+			events.y = e.changedTouches[0].pageY;
+			events.x = e.changedTouches[0].pageX;
+		}
 		else {
 			events.y = e.touches[0].pageY;
 			events.x = e.touches[0].pageX;
@@ -192,6 +198,10 @@ Linotype.prototype.initEventListeners = function () {
 		var touchEvents = getEventsPage(e);
 		touchStartY = touchEvents.y;
 		touchStartX = touchEvents.x;
+		if (e.touches) {
+			touchMoveStartY = e.touches[0].screenY;
+			touchMoveStartX = e.touches[0].screenX;
+		}
 	};
 
 	/**
@@ -201,6 +211,21 @@ Linotype.prototype.initEventListeners = function () {
 	 * @this {Linotype}
 	 */
 	var touchMoveHandler = function (e) {
+		var touchEvents = getEventsPage(e);
+		touchEndY = touchEvents.y;
+		touchEndX = touchEvents.x;
+
+		// if (e.touches) {
+		// 	this.options.firstsection.style['margin-top'] = (Math.abs(touchMoveStartY - e.touches[0].screenY) + (this.options.sectionHeight * this.options.currentSection)) * -1;
+		// }
+	}.bind(this);
+
+	/**
+	 * handle touch end events
+	 * @event touchEndHandler
+	 * @param {object} e touch event object
+	 */
+	var touchEndHandler = function (e) {
 		var touchEvents = getEventsPage(e);
 		touchEndY = touchEvents.y;
 		touchEndX = touchEvents.x;
@@ -237,6 +262,8 @@ Linotype.prototype.initEventListeners = function () {
 			this.options.$el.addEventListener('MSPointerDown', touchStartHandler, false);
 			this.options.$el.addEventListener('touchmove', touchMoveHandler, false);
 			this.options.$el.addEventListener('MSPointerMove', touchMoveHandler, false);
+			this.options.$el.addEventListener('touchend', touchEndHandler, false);
+			this.options.$el.addEventListener('MSPointerEnd', touchEndHandler, false);
 		}
 	}
 };

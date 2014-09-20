@@ -10,7 +10,7 @@
 var should = require('chai').should(),
 	expect = require('chai').expect,
 	Linotype = require('../lib/linotype'),
-	Browser = require("zombie"),
+	// Browser = require("zombie"),
 	path = require("path");
 
 // var linotypeFactory = {

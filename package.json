@@ -1,7 +1,7 @@
 {
   "name": "linotypejs",
   "description": "full page composition module",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "engines": {
     "node": ">=0.10.x"
@@ -17,10 +17,10 @@
     "browserify": ">=4.2.1",
     "classie": ">=0.0.1",
     "domhelper": "^0.9.1",
-    "jsdoc": "^3.3.0-alpha9",
     "util-extend": "^1.0.1"
   },
   "devDependencies": {
+    "jsdoc": "^3.3.0-alpha9",
     "chai": "1.9.1",
     "ejs": ">=0.8.5",
     "grunt": ">=0.4.5",
@@ -39,8 +39,7 @@
     "jsdoc": "3.3.0-alpha5",
     "mocha": "1.9.0",
     "uglify-js": "^2.4.15",
-    "uglifyify": "^2.5.0",
-    "zombie": "~2.0.0-alpha31"
+    "uglifyify": "^2.5.0"
   },
   "keywords": [
     "content presentation framework",
