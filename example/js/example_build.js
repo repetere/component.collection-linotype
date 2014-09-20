@@ -36,7 +36,7 @@ var classie = require('classie'),
  * @author Yaw Joseph Etse
  * @copyright Copyright (c) 2014 Typesettin. All rights reserved.
  * @license MIT
- * @module Linotype
+ * @constructor Linotype
  * @requires module:classie
  * @requires module:util-extent
  * @requires module:util
@@ -63,11 +63,12 @@ var Linotype = function (options) {
 		touchSensitivity: 5,
 		sectionHeight: null,
 		callback: false,
+		normalscroll: false,
 		continuous: false
 	};
 	this.$el = null;
 
-	//extend default options
+	/** extended default options */
 	this.options = extend(defaults, options);
 
 	this.init(this.options);
@@ -78,12 +79,12 @@ util.inherits(Linotype, events.EventEmitter);
 
 /**
  * Sets up a new lintotype component.
- * @param {object} options - configuration options
  */
 Linotype.prototype.initEventListeners = function () {
 	/**
 	 * recalculate the window dimensions.
-	 * @this {object}
+	 * @event resizeEventHandler
+	 * @this {Linotype}
 	 */
 	var resizeEventHandler = function () {
 		this.options.sectionHeight = this.options.$el.parentNode.clientHeight;
@@ -91,8 +92,9 @@ Linotype.prototype.initEventListeners = function () {
 
 	/**
 	 * handle keyboard arrow events.
-	 * @event - keydown
-	 * @this {object}
+	 * @event keyboardEventHandler
+	 * @param {object} e touch event object
+	 * @this {Linotype}
 	 */
 	var keyboardEventHandler = function (e) {
 		switch (e.which) {
@@ -125,9 +127,9 @@ Linotype.prototype.initEventListeners = function () {
 
 	/**
 	 * handle mouse scroll wheel events.
-	 * @event - mouse scroll
-	 * @var {delta} - scroll direction
-	 * @this {object}
+	 * @event mouseWheelHandler
+	 * @param {object} e touch event object
+	 * @this {Linotype}
 	 */
 	var mouseWheelHandler = function (e) {
 		e = window.event || e;
@@ -165,8 +167,8 @@ Linotype.prototype.initEventListeners = function () {
 	/**
 	 * Gets the pageX and pageY properties depending on the browser.
 	 * https://github.com/alvarotrigo/fullPage.js/issues/194#issuecomment-34069854
+	 * @param {object} e touch event object
 	 * @returns {object} events object of page touch points
-	 * @event - mouse scroll
 	 */
 	var getEventsPage = function (e) {
 		var events = [];
@@ -183,20 +185,20 @@ Linotype.prototype.initEventListeners = function () {
 
 	/**
 	 * handle touch start events
-	 * @event - touch event
-	 * @this {object}
+	 * @event touchStartHandler
+	 * @param {object} e touch event object
 	 */
 	var touchStartHandler = function (e) {
 		var touchEvents = getEventsPage(e);
 		touchStartY = touchEvents.y;
 		touchStartX = touchEvents.x;
-		// console.log('touchStartHandler', touchStartX, touchStartY);
 	};
 
 	/**
 	 * handle touch move events
-	 * @event - touch event
-	 * @this {object}
+	 * @event touchMoveHandler
+	 * @param {object} e touch event object
+	 * @this {Linotype}
 	 */
 	var touchMoveHandler = function (e) {
 		var touchEvents = getEventsPage(e);
@@ -241,6 +243,7 @@ Linotype.prototype.initEventListeners = function () {
 /**
  * Sets up a new lintotype component.
  * @param {object} options - configuration options
+ * @emits - init
  */
 Linotype.prototype.init = function (options) {
 	this.options = options;
@@ -250,7 +253,7 @@ Linotype.prototype.init = function (options) {
 	this.options.numSections = this.options.sections.length;
 	this.options.sectionHeight = this.options.$el.parentNode.clientHeight;
 	this.options.elementParent = this.options.$el.parentNode;
-	if (document.addEventListener) {
+	if (document.addEventListener && this.options.normalscroll === false) {
 		classie.addClass(this.options.$el, 'linotype-has-js');
 		this.initEventListeners();
 	}
@@ -264,6 +267,7 @@ Linotype.prototype.init = function (options) {
 };
 /**
  * Move Section up Shortcut.
+ * @param {object} moveOptions - only move if there is not an internal element with a scroll
  */
 Linotype.prototype.moveSectionUp = function (moveOptions) {
 	var currentIndex = this.options.currentSection,
@@ -279,6 +283,7 @@ Linotype.prototype.moveSectionUp = function (moveOptions) {
 };
 /**
  * Move Section down Shortcut.
+ * @param {object} moveOptions - only move if there is not an internal element with a scroll
  */
 Linotype.prototype.moveSectionDown = function (moveOptions) {
 	var currentIndex = this.options.currentSection,
@@ -320,6 +325,7 @@ Linotype.prototype.section = function (sectionIndex) {
 };
 /**
  * Shift section
+ * @inner
  * @param {object} options - move direction options
  */
 Linotype.prototype.moveSection = function (options) {
@@ -348,16 +354,18 @@ Linotype.prototype.moveSection = function (options) {
 	this.emit('movedSection', direction);
 };
 /**
- * Returns current lintotype config element.
- * @return {option} - configuration object
+ * Returns current linotype config element.
+ * @return {object} - linotype instance configuration object
  */
 Linotype.prototype.config = function () {
 	return this.lintotypeDomElement;
 };
 /**
- * Sets up a new lintotype component.
- * @event - simple event emitter test
- * @param {object} options - configuration options
+ * sample event emitter test
+ * @event emitTest
+ * @fires - emittest
+ * @param {object} options sample object to return
+ * @return {object} @param options
  */
 Linotype.prototype.emitTest = function (options) {
 	this.emit('emittest', options);
