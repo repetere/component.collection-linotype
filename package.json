@@ -1,7 +1,7 @@
 {
   "name": "linotypejs",
   "description": "full page composition module",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "index.js",
   "engines": {
     "node": ">=0.10.x"
@@ -14,12 +14,11 @@
     "test": "mocha -R spec --recursive"
   },
   "dependencies": {
-    "browserify": ">=4.2.1",
     "classie": ">=0.0.1",
-    "domhelper": "^0.9.1",
     "util-extend": "^1.0.1"
   },
   "devDependencies": {
+    "browserify": ">=4.2.1",
     "jsdoc": "^3.3.0-alpha9",
     "chai": "1.9.1",
     "ejs": ">=0.8.5",
