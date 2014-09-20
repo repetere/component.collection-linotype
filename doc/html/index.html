@@ -43,9 +43,10 @@
     <section>
         <article><h1>component.collection-linotype <a href="https://travis-ci.org/typesettin/component.collection-linotype"><img src="https://travis-ci.org/typesettin/component.collection-linotype.svg?branch=master" alt="Build Status"></a> <a href="http://badge.fury.io/js/linotypejs"><img src="https://badge.fury.io/js/linotypejs.svg" alt="NPM version"></a></h1><h2>Example</h2><p>Check out <code>example/index.html</code>, the example javascript for the example page is <code>resources/js/example_src.js</code> and in the head section of the respective examples. Full non-js graceful fallback</p>
 <p><a href="http://typesettin.github.io/component.collection-linotype">Live Demo - http://typesettin.github.io/component.collection-linotype</a></p>
-<h2>Installation</h2><pre class="prettyprint source"><code>$ npm install linotypejs</code></pre><p>The full page scroll component is a browserify javascript module.</p>
+<h2>Installation</h2><pre><code>$ npm install linotypejs
+</code></pre><p>The full page scroll component is a browserify javascript module.</p>
 <h2>Usage</h2><p><em>JavaScript</em></p>
-<pre class="prettyprint source lang-javascript"><code>var LinotypeObject = require('linotypejs'),
+<pre><code class="lang-javascript">var LinotypeObject = require('linotypejs'),
     myLinotype;
 //initialize linotype component after the dom has loaded
 window.addEventListener('load',function(){
@@ -54,34 +55,42 @@ window.addEventListener('load',function(){
     });
     //expose your nav component to the window global namespace
     window.myLinotype = myLinotype;
-});</code></pre><p><em>HTML</em></p>
-<pre class="prettyprint source lang-html"><code>&lt;html>
-    &lt;head>
-      &lt;title>Your Page&lt;/title>
-      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;[path/to]/component.collection-linotype.css&quot;>
-      &lt;script src='[path/to/browserify/bundle].js'>&lt;/script>
-    &lt;/head>
-    &lt;body>
-    &lt;div id=&quot;linotype&quot; class=&quot;linotype&quot;>
-        &lt;div class=&quot;section active&quot;>
-            &lt;h1>Page One &lt;/h1>
-            &lt;p>the basic structure, require a linotype class (for css) and sections for each fullpage section&lt;/p>
-          &lt;/div>
-          &lt;div class=&quot;section&quot;>
-            &lt;h1>Page Two &lt;/h1>
-            &lt;p>Any html content can go here&lt;/p>
-          &lt;/div>
-          &lt;div class=&quot;section&quot;>
-            &lt;h1>Page Three &lt;/h1>
-            &lt;p>Keyboard, MouseWheel and Touch Support&lt;/p>
-          &lt;/div>
-          &lt;div class=&quot;section&quot;>
-            &lt;h1>Page Four &lt;/h1>
-          &lt;/div>
-    &lt;/body>
-&lt;/html></code></pre><h2>API</h2><pre class="prettyprint source lang-javascript"><code>myLinotype.section(1); //jump to section 1</code></pre><h3><a href="https://github.com/typesettin/component.collection-linotype/blob/master/doc/api.md"><em>FULL API DOCUMENTATION</em></a></h3><h2>Development</h2><p><em>Make sure you have grunt installed</em></p>
-<pre class="prettyprint source"><code>$ npm install -g grunt-cli</code></pre><p>Then run grunt watch</p>
-<pre class="prettyprint source"><code>$ grunt watch</code></pre><h2>Notes</h2><ul>
+});
+</code></pre>
+<p><em>HTML</em></p>
+<pre><code class="lang-html">&lt;html&gt;
+    &lt;head&gt;
+      &lt;title&gt;Your Page&lt;/title&gt;
+      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;[path/to]/component.collection-linotype.css&quot;&gt;
+      &lt;script src='[path/to/browserify/bundle].js'&gt;&lt;/script&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+    &lt;div id=&quot;linotype&quot; class=&quot;linotype&quot;&gt;
+        &lt;div class=&quot;section active&quot;&gt;
+            &lt;h1&gt;Page One &lt;/h1&gt;
+            &lt;p&gt;the basic structure, require a linotype class (for css) and sections for each fullpage section&lt;/p&gt;
+          &lt;/div&gt;
+          &lt;div class=&quot;section&quot;&gt;
+            &lt;h1&gt;Page Two &lt;/h1&gt;
+            &lt;p&gt;Any html content can go here&lt;/p&gt;
+          &lt;/div&gt;
+          &lt;div class=&quot;section&quot;&gt;
+            &lt;h1&gt;Page Three &lt;/h1&gt;
+            &lt;p&gt;Keyboard, MouseWheel and Touch Support&lt;/p&gt;
+          &lt;/div&gt;
+          &lt;div class=&quot;section&quot;&gt;
+            &lt;h1&gt;Page Four &lt;/h1&gt;
+          &lt;/div&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h2>API</h2><pre><code class="lang-javascript">myLinotype.section(1); //jump to section 1
+</code></pre>
+<h3><a href="https://github.com/typesettin/component.collection-linotype/blob/master/doc/api.md"><em>FULL API DOCUMENTATION</em></a></h3><h2>Development</h2><p><em>Make sure you have grunt installed</em></p>
+<pre><code>$ npm install -g grunt-cli
+</code></pre><p>Then run grunt watch</p>
+<pre><code>$ grunt watch
+</code></pre><h2>Notes</h2><ul>
 <li>The Navigation Module uses Node's event Emitter for event handling.</li>
 <li>The less file is located in <code>resources/stylesheets</code></li>
 </ul>
@@ -99,13 +108,13 @@ window.addEventListener('load',function(){
 </div>
 
 <nav>
-    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="Linotype.html">Linotype</a></li></ul><h3>Events</h3><ul><li><a href="global.html#event:emitTest">emitTest</a></li><li><a href="global.html#event:keyboardEventHandler">keyboardEventHandler</a></li><li><a href="global.html#event:mouseWheelHandler">mouseWheelHandler</a></li><li><a href="global.html#event:resizeEventHandler">resizeEventHandler</a></li><li><a href="global.html#event:touchMoveHandler">touchMoveHandler</a></li><li><a href="global.html#event:touchStartHandler">touchStartHandler</a></li></ul><h3>Global</h3><ul><li><a href="global.html#options">options</a></li></ul>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="Linotype.html">Linotype</a></li></ul><h3>Events</h3><ul><li><a href="global.html#event:emitTest">emitTest</a></li><li><a href="global.html#event:keyboardEventHandler">keyboardEventHandler</a></li><li><a href="global.html#event:mouseWheelHandler">mouseWheelHandler</a></li><li><a href="global.html#event:resizeEventHandler">resizeEventHandler</a></li><li><a href="global.html#event:touchEndHandler">touchEndHandler</a></li><li><a href="global.html#event:touchMoveHandler">touchMoveHandler</a></li><li><a href="global.html#event:touchStartHandler">touchStartHandler</a></li></ul><h3>Global</h3><ul><li><a href="global.html#options">options</a></li></ul>
 </nav>
 
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Sat Sep 20 2014 01:19:33 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Sat Sep 20 2014 11:58:38 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>
