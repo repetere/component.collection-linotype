@@ -1,0 +1,25 @@
+<html>
+
+<head>
+  <% var title="basic usage" %>
+    <% include ../shared/_head_elements %>
+
+      <script>
+      var LinotypeExample;
+      window.addEventListener('load', function() {
+        LinotypeExample = new Linotype({
+          start: 2,
+          callback: function(currentIndex) {
+            console.log('currentIndex', currentIndex);
+          }
+        });
+      }, false);
+      </script>
+</head>
+
+<body id="demo-color">
+  <% include ../shared/_home_button %>
+    <% include ../shared/_democontent %>
+</body>
+
+</html>

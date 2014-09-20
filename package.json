@@ -1,37 +1,45 @@
 {
   "name": "linotypejs",
   "description": "full page composition module",
-  "version": "0.9.3",
+  "version": "1.0.0",
   "main": "index.js",
   "engines": {
     "node": ">=0.10.x"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/typesettin/linotype.git"
+    "url": "git://github.com/typesettin/component.collection-linotype.git"
   },
   "scripts": {
     "test": "mocha -R spec --recursive"
   },
   "dependencies": {
-    "browserify": ">=3.46.0",
+    "browserify": ">=4.2.1",
     "classie": ">=0.0.1",
+    "domhelper": "^0.9.1",
     "util-extend": "^1.0.1"
   },
   "devDependencies": {
-    "chai": "1.5.0",
-    "grunt": "0.4.1",
-    "grunt-contrib-jshint": "0.4.3",
-    "grunt-contrib-copy": "0.4.1",
-    "grunt-contrib-watch": "0.4.1",
-    "grunt-simple-mocha": "0.4.0",
-    "grunt-jsbeautifier": "0.1.7",
+    "zombie": "~2.0.0-alpha31",
+    "chai": "1.9.1",
+    "grunt": ">=0.4.5",
+    "grunt-contrib-jshint": ">=0.4.3",
+    "grunt-contrib-watch": ">=0.4.1",
+    "grunt-simple-mocha": ">=0.4.0",
+    "grunt-jsbeautifier": ">=0.2.7",
+    "grunt-contrib-copy": ">=0.5.0",
+    "grunt-browserify": ">=2.1.3",
+    "grunt-contrib-less": ">=0.11.3",
+    "grunt-jsdoc": ">=0.5.6",
+    "grunt-contrib-uglify": ">=0.4.0",
+    "grunt-contrib-cssmin": ">=0.9.0",
+    "grunt-templater": ">=0.0.6",
+    "grunt-newer": ">=0.7.0",
+    "jsdoc": "3.3.0-alpha5",
     "mocha": "1.9.0",
-    "grunt-browserify": "^2.0.8",
-    "grunt-contrib-less": "^0.11.0",
-    "jsdoc": "^3.3.0-alpha5",
-    "grunt-jsdoc": "^0.5.4",
-    "zombie": "~2.0.0-alpha31"
+    "uglify-js": "^2.4.15",
+    "uglifyify": "^2.5.0",
+    "ejs": ">=0.8.5"
   },
   "keywords": [
     "content presentation framework",

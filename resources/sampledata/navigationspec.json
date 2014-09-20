@@ -1,0 +1,51 @@
+{
+	"navigationspec":{
+		"config":{
+			"html":{
+				"dom_init_class":"ha-header-rotateBack",
+				"dom_id":"ha-header"
+			}
+		},
+		"content":{
+			"heading":{
+				"navtype":"html",
+				"navlabel":"Travel + Leisure",
+				"navhtml":"<a href='/'><img src='http://getperiodic.org/assets/img/periodic-favicon.png'/></a>"
+			},
+			"nav":[{
+				"navtype":"link",
+				"navlabel":"items",
+				"navurl":"/items"
+			},{
+				"navtype":"link",
+				"navlabel":"collections",
+				"navurl":"/collections"	
+			},{
+				"navtype":"link",
+				"navlabel":"browse",
+				"navurl":"/browse/contenttypes",
+				"nav":[{
+					"navtype":"link",
+					"navlabel":"authors",
+					"navurl":"/browse/authors"
+				},{
+					"navtype":"link",
+					"navlabel":"content types",
+					"navurl":"/browse/contenttypes"
+				},{
+					"navtype":"link",
+					"navlabel":"categories",
+					"navurl":"/browse/categories"
+				},{
+					"navtype":"link",
+					"navlabel":"tags",
+					"navurl":"/browse/tags"
+				}]
+			},{
+				"navtype":"html",
+				"navlabel":"search",
+				"navhtml":"<a class='search-nav'> <form action='/search' method='get' class='_pea-form'> input type='text'> </form> </a>"	
+			}]
+		}
+	}
+}

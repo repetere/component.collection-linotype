@@ -6,141 +6,169 @@
  */
 'use strict';
 
-module.exports = function(grunt) {
-  grunt.initConfig({
-    jsbeautifier: {
-      files: ["<%= jshint.all %>"],
-      options: {
-        "indent_size": 2,
-        "indent_char": " ",
-        "indent_level": 0,
-        "indent_with_tabs": false,
-        "preserve_newlines": true,
-        "max_preserve_newlines": 10,
-        "brace_style": "collapse",
-        "keep_array_indentation": false,
-        "keep_function_indentation": false,
-        "space_before_conditional": true,
-        "eval_code": false,
-        "indent_case": false,
-        "unescape_strings": false,
-        "space_after_anon_function": true
-      }
-    },
-    simplemocha: {
-      options: {
-        globals: ['should'],
-        timeout: 3000,
-        ignoreLeaks: false,
-        ui: 'bdd',
-        reporter: 'spec'
-      },
-      all: {
-        src: 'test/**/*.js'
-      }
-    },
-    jshint: {
-      options: {
-        jshintrc: '.jshintrc'
-      },
-      all: [
-        'Gruntfile.js',
-        'config/**/*.js',
-        'index.js',
-        'lib/**/*.js',
-        'routes/**/*.js',
-        'test/**/*.js',
-        'client/**/*.js',
-      ]
-    },
-    jsdoc : {
-        dist : {
-            src: ['lib/*.js', 'test/*.js'],
-            options: {
-                destination: 'doc/html',
-                configure: 'jsdoc.json'
-            }
-        }
-    },
-    browserify: {
-      dist: {
-        files: {
-          'example/build/main.js': ['client/scripts/**/*.js'],
-          'example/test/test.js': ['client/test/scripts/test_main.js'],
-          'example/test/test-normalscroll.js': ['client/test/scripts/test_normalscroll.js'],
-          'example/test/test-backgrounds.js': ['client/test/scripts/test_backgrounds.js'],
-          'example/test/test-video.js': ['client/test/scripts/test_video.js'],
-          'example/test/test-callback.js': ['client/test/scripts/test_callback.js'],
-          'example/test/test-fixedheaders.js': ['client/test/scripts/test_fixedheaders.js'],
-          'example/test/test-scroll.js': ['client/test/scripts/test_scroll.js'],
-          // 'build/main.js': ['client/scripts/**/*.js', 'client/scripts/**/*.coffee'],
-        },
-        options: {
-          // transform: ['coffeeify']
-        }
-      }
-    },
-    less: {
-      development: {
-        options: {
-          paths: ["client/stylesheets"],
-          yuicompress: true
-        },
-        files: {
-          "example/build/linotype.css": ['client/stylesheets/**/*.less']
-        }
-      }
-    },
-    copy: {
-      main: {
-        files: [
-          // includes files within path
-          // {expand: true, src: ['path/*'], dest: 'dest/', filter: 'isFile'},
+var path = require('path');
 
-          // includes files within path and its sub-directories
-          // {expand: true, src: ['assets/**'], dest: '../module/assets/'},
+module.exports = function (grunt) {
+	grunt.initConfig({
+		simplemocha: {
+			options: {
+				globals: ['should', 'window'],
+				timeout: 3000,
+				ignoreLeaks: false,
+				ui: 'bdd',
+				reporter: 'spec'
+			},
+			all: {
+				src: 'test/**/*.js'
+			}
+		},
+		jshint: {
+			options: {
+				jshintrc: '.jshintrc'
+			},
+			all: [
+				'Gruntfile.js',
+				'index.js',
+				'lib/**/*.js',
+				'resources/**/*.js',
+				'resources/**/*.ejs',
+				'test/**/*.js',
+			]
+		},
+		jsbeautifier: {
+			files: ['<%= jshint.all %>', '!resources/template/shared/**/*.ejs'],
+			options: {
+				config: '.jsbeautify'
+			}
+		},
+		jsdoc: {
+			dist: {
+				src: ['lib/*.js', 'test/*.js'],
+				options: {
+					destination: 'doc/html',
+					configure: 'jsdoc.json'
+				}
+			}
+		},
+		browserify: {
+			dist: {
+				files: [{
+					expand: true,
+					cwd: 'resources',
+					src: ['**/*_src.js'],
+					dest: 'example',
+					rename: function (dest, src) {
+						var finallocation = path.join(dest, src);
+						finallocation = finallocation.replace('_src', '_build');
+						finallocation = finallocation.replace('resources', 'example');
+						finallocation = path.resolve(finallocation);
+						return finallocation;
+					}
+				}],
+				options: {}
+			}
+		},
+		uglify: {
+			options: {
+				sourceMap: true,
+				compress: {
+					drop_console: false
+				}
+			},
+			all: {
+				files: [{
+					expand: true,
+					cwd: 'example',
+					src: ['**/*_build.js'],
+					dest: 'example',
+					rename: function (dest, src) {
+						var finallocation = path.join(dest, src);
+						finallocation = finallocation.replace('_build', '.min');
+						finallocation = path.resolve(finallocation);
+						return finallocation;
+					}
+				}]
+			}
+		},
+		copy: {
+			main: {
+				cwd: 'example',
+				expand: true,
+				src: '**/*.*',
+				dest: '../../../example/themes/periodicjs.theme.periodical',
+			},
+		},
+		less: {
+			development: {
+				options: {
+					sourceMap: true,
+					yuicompress: true,
+					compress: true
+				},
+				files: [{
+					'example/stylesheets/component.collection-linotype.css': 'resources/stylesheets/component.collection-linotype.less'
+				}, {
+					'example/stylesheets/component.collection-linotype-two.css': 'resources/stylesheets/component.collection-linotype-two.less'
+				}, {
+					'example/stylesheets/example.css': 'resources/stylesheets/example.less'
+				}]
+			}
+		},
+		template: {
+			all: {
+				files: [{
+					expand: true,
+					cwd: 'resources/template',
+					src: ['pages/*.ejs', 'index.ejs', '!shared/**/*.ejs'],
+					dest: 'example',
+					ext: '.html'
+				}],
+				variables: {
+					env: true
+				}
+			}
+		},
+		watch: {
+			scripts: {
+				// files: '**/*.js',
+				files: [
+					'Gruntfile.js',
+					'index.js',
+					'lib/**/*.js',
+					'resources/**/*.js',
+					'resources/**/*.less',
+					'resources/**/*.ejs',
+					'test/**/*.js',
+				],
+				tasks: ['lint', 'packagejs', 'less', 'html', /*'doc',*/ 'test'],
+				options: {
+					interrupt: true,
+					livereload: true
+				},
+				livereload: {
+					// Here we watch the files the sass task will compile to
+					// These files are sent to the live reload server after sass compiles to them
+					options: {
+						livereload: true
+					},
+					files: ['**/*.*'],
+				},
+			}
+		}
+	});
 
-          // makes all src relative to cwd
-          // {expand: true, cwd: 'path/', src: ['**'], dest: 'dest/'},
 
-          // flattens results to a single level
-          // {expand: true, flatten: true, src: ['path/**'], dest: 'dest/', filter: 'isFile'}
-        ]
-      }
-    },
-    watch: {
-      scripts: {
-        // files: '**/*.js',
-        files: [
-          'Gruntfile.js',
-          'config/**/*.js',
-          'index.js',
-          'lib/**/*.js',
-          'client/**/*.js',
-          'client/**/*.less',
-          'test/**/*.js',
-        ],
-        tasks: ['lint','browserify',/*'doc',*/ 'test','less'],
-        options: {
-          interrupt: true
-        }
-      }
-      // files: "./assets/stylesheets/less/*",
-      // tasks: ["less"]
-    }
-  });
+	// Loading dependencies
+	for (var key in grunt.file.readJSON('package.json').devDependencies) {
+		if (key.indexOf('grunt') === 0 && key !== 'grunt') {
+			grunt.loadNpmTasks(key);
+		}
+	}
 
-  grunt.loadNpmTasks('grunt-simple-mocha');
-  grunt.loadNpmTasks('grunt-jsbeautifier');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-contrib-copy');
-  grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-browserify');
-  grunt.loadNpmTasks('grunt-contrib-less');
-  grunt.loadNpmTasks('grunt-jsdoc');
-
-  grunt.registerTask('default', ['jshint', 'simplemocha']);
-  grunt.registerTask('lint', 'jshint');
-  grunt.registerTask('doc','jsdoc');
-  grunt.registerTask('test', 'simplemocha');
+	grunt.registerTask('default', ['jshint', 'simplemocha']);
+	grunt.registerTask('lint', 'jshint', 'jsbeautifier');
+	grunt.registerTask('packagejs', ['browserify', 'uglify']);
+	grunt.registerTask('doc', 'jsdoc');
+	grunt.registerTask('test', 'simplemocha');
+	grunt.registerTask('html', 'newer:template');
 };

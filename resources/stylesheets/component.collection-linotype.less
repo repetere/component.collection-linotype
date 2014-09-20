@@ -1,0 +1,35 @@
+html, body, .container, .header {
+	height: 100%;
+}
+body {
+	padding: 0;
+	margin: 0;
+	.linotype{
+		height:auto;
+		.section,.slide{
+			position: relative;
+			-webkit-box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			box-sizing: border-box;
+			height:100%;
+			max-height:100%;
+			width: 100%;
+			overflow: hidden;
+			overflow-y: auto;
+	    -webkit-transition: all 0.3s ease-out;
+	    -moz-transition: all 0.3s ease-out;
+	    -o-transition: all 0.3s ease-out;
+	    transition: all 0.3s ease-out;
+		}
+		&.linotype-has-js{
+			overflow: hidden;
+			height:100%;
+		}
+		&.easing {
+		    -webkit-transition: all 0.7s ease-out;
+		    -moz-transition: all 0.7s ease-out;
+		    -o-transition: all 0.7s ease-out;
+		    transition: all 0.7s ease-out;
+		}	
+	}
+}
