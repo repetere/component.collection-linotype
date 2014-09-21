@@ -1,7 +1,7 @@
 {
   "name": "linotypejs",
   "description": "full page composition module",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "index.js",
   "engines": {
     "node": ">=0.10.x"

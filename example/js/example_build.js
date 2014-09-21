@@ -333,7 +333,7 @@ Linotype.prototype.section = function (sectionIndex) {
 		var index = (sectionIndex) ? parseInt(sectionIndex, 10) : 0;
 		this.options.sections[sectionIndex].scrollTop = 0;
 		this.options.isMoving = true;
-		this.options.firstsection.style['margin-top'] = this.options.sectionHeight * -1 * index;
+		this.options.firstsection.style['margin-top'] = this.options.sectionHeight * -1 * index + 'px';
 		this.options.currentSection = index;
 		for (var i = 0; i < this.options.numSections; i++) {
 			classie.removeClass(this.options.sections[i], 'active');
